@@ -93,6 +93,7 @@ input[type=text]:focus-visible,input[type=date]:focus-visible,button:focus-visib
 .vseg{width:auto}
 .vseg button{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;min-height:38px}
 .vseg svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ft.next{outline:2px solid var(--accent);outline-offset:-2px}
 .ft.ok{background:var(--accent-soft);border-color:transparent;grid-template-rows:auto;align-content:center;justify-items:center;text-align:center;gap:8px}
 .ft.ok .pill{background:var(--surface);display:inline-flex;align-items:center;gap:5px;width:fit-content;max-width:100%;white-space:normal}
 .ft.ok .fl{font-size:clamp(17px,4.6vw,22px);line-height:1.15;font-weight:700}
@@ -334,11 +335,11 @@ details{display:grid;gap:12px}
       <p class="warn" id="otroWarn" hidden></p>
       <button type="button" class="primary" id="reg">Registrar compra con la CMR</button>
     </div>
-          <div class="n hc" id="hc-a50" data-key="a50"><div class="hpart" id="part-a50"><span class="eyebrow" data-tx="t-a50">50% de descuento en administración</span><span class="big" id="hb-a50"></span><span class="calc" id="hs-a50"></span><div class="bar" id="hbar-a50"><i id="hp-a50"></i></div><div class="sp" id="hg-a50"></div></div><hr class="hdiv"><div class="hpart" id="hc-a100"><span class="eyebrow" data-tx="t-a100">100% de descuento: administración gratis</span><span class="big" id="hb-a100"></span><span class="calc" id="hs-a100"></span><div class="bar" id="hbar-a100"><i id="hp-a100"></i></div><div class="sp" id="hg-a100"></div></div></div>
-          <div class="n hc" id="hc-x4" data-key="x4"><div class="hpart" id="part-x4"><span class="eyebrow" data-tx="t-x4">Multiplicador por 4 en todas tus compras</span><span class="big" id="hb-x4"></span><span class="calc" id="hs-x4"></span><div class="bar" id="hbar-x4"><i id="hp-x4"></i></div><div class="sp" id="hg-x4"></div></div><hr class="hdiv"><div class="hpart" id="part-x5"><span class="eyebrow" data-tx="t-x5">Multiplicador por 5 en todas tus compras</span><span class="big" id="hb-x5"></span><span class="calc" id="hs-x5"></span><div class="bar" id="hbar-x5"><i id="hp-x5"></i></div><div class="sp" id="hg-x5"></div></div><div class="gtxt"><span class="wpill" id="xInfo"></span></div></div>
         </div>
         <div class="ladder" id="ladder"></div>
         <p class="note" id="ladderNote"></p>
+        <div id="goalNotes"></div>
+        <p class="note" id="xInfoNote"></p>
         <p class="note" id="hitsNote"></p>
         <p class="note" id="startNote"></p>
       </div>
@@ -666,46 +667,32 @@ details{display:grid;gap:12px}
       return '';
     }
     var nxt=H.find(function(h){return !why(h);});
-    var PART={a50:'part-a50',a100:'hc-a100',x4:'part-x4',x5:'part-x5'};
     var byK={};H.forEach(function(h){byK[h.k]=h;});
-    H.forEach(function(h){
-      var k=h.k,w=why(h);
-      $(PART[k]).classList.toggle('ok',!!w);
+    /* Notas de los objetivos, al final de la página: cambian solas con tus puntos, tu gasto y la fecha */
+    var NN={a50:'50% de descuento en administración',a100:'100% de descuento: administración gratis',x4:'Multiplicador por 4',x5:'Multiplicador por 5'};
+    $('goalNotes').innerHTML=['a50','a100','x4','x5'].map(function(k){
+      var h=byK[k],w=why(h),txt;
       if(w){
-        $('hb-'+k).hidden=false;
-        $('hb-'+k).innerHTML='<span class="pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>'+w+'</span>';
         var cy=S.carry,fromCarry=cy&&cy.mult>=(k==='x5'?5:4)&&cy.multHasta&&cy.multHasta>=today()&&String(cy.year)!==S.year;
-        $('hs-'+k).textContent=(w==='Ya lo tienes')?(fromCarry?'Ganado en '+cy.year+(k==='x5'?' · duración por confirmar':' · hasta '+dmy(cy.multHasta)):'Lo marcaste en Configurar'):(k==='x5')?'Duración por confirmar con Falabella':'Vigente hasta el 31 de diciembre de '+(Number(S.year)+1);
-        $('hbar-'+k).hidden=true;$('hg-'+k).innerHTML='';
+        txt=(w==='Ya lo tienes')?(fromCarry?'Ganado en '+cy.year+(k==='x5'?' · duración por confirmar':' · hasta '+dmy(cy.multHasta)):'Lo marcaste en Configurar'):(k==='x5')?'Duración por confirmar con Falabella':'Vigente hasta el 31 de diciembre de '+(Number(S.year)+1);
+        txt='Meta cumplida. '+txt+'.';
       }else{
-        var need=h.val+1-acc;
-        var gG=gastoPara(acc,h.val+1,S.set.tramoG), gO=gastoPara(acc,h.val+1,S.set.tramoO);
-        var pct=Math.max(0,Math.min(100,acc/h.val*100));
-        $('hb-'+k).textContent='';$('hb-'+k).hidden=true;
-        $('hs-'+k).textContent='Corte sobre '+fmt(h.val)+' puntos';
-        $('hbar-'+k).hidden=false;$('hp-'+k).style.width=pct+'%';
-        var by=(h.spend&&gy!=null)?'<div><span>Por gasto CMR</span><b>'+clp(Math.max(0,h.spend-gy)+1)+'</b></div>':'';
-        $('hg-'+k).innerHTML='<div><span>Grupo Falabella</span><b>'+clp(gG)+'</b></div><div><span>Otros comercios</span><b>'+clp(gO)+'</b></div>'+by;
+        txt='Corte sobre '+fmt(h.val)+' puntos';
+        if(h.spend)txt+=', o gasto sobre '+clp(h.spend)+(gy!=null?' (te faltan '+clp(Math.max(0,h.spend-gy)+1)+')':'');
+        if(k==='x5')txt+='. Duración por confirmar con Falabella';
+        txt+='.';
       }
-    });
+      return '<p class="note"><b>'+NN[k]+':</b> '+txt+'</p>';
+    }).join('');
     /* Puntos que faltan: sección de la tarjeta principal, se actualiza con cada monto */
     var FAL=[['a50','50% de descuento'],['a100','100% de descuento'],['x4','Multiplicador por 4'],['x5','Multiplicador por 5']];
     $('falg').innerHTML=FAL.map(function(f){
       var h=byK[f[0]],w=why(h);
       var costo=w?'':clp(gastoPara(acc,h.val+1,S.vista==='o'?S.set.tramoO:S.set.tramoG));
-      return '<div class="ft'+(w?' ok':'')+'"><span class="fl">'+f[1]+'</span>'+(w?'<span class="pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>'+w+'</span>':'<div class="fb"><span class="fn">'+fmt(h.val+1-acc)+'<small>Pts</small></span><span class="fc"><small>Por gastar</small>'+costo+'</span></div>')+'</div>';
+      return '<div class="ft'+(w?' ok':'')+(nxt&&nxt.k===f[0]?' next':'')+'"><span class="fl">'+f[1]+'</span>'+(w?'<span class="pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>'+w+'</span>':'<div class="fb"><span class="fn">'+fmt(h.val+1-acc)+'<small>Pts</small></span><span class="fc"><small>Por gastar</small>'+costo+'</span></div>')+'</div>';
     }).join('');
     [].forEach.call(document.querySelectorAll('#vseg button'),function(b){b.setAttribute('aria-pressed',String(b.dataset.v===(S.vista==='o'?'o':'g')));});
-    /* En cada tarjeta doble, la meta en curso va arriba y la cumplida abajo; con las dos cumplidas, toda la tarjeta en verde */
-    [['a50','a100','hc-a50'],['x4','x5','hc-x4']].forEach(function(pr){
-      var d1=!!why(byK[pr[0]]),d2=!!why(byK[pr[1]]);
-      $(PART[pr[0]]).classList.toggle('low',d1);
-      $(PART[pr[1]]).classList.toggle('low',!d1);
-      var card=$(pr[2]);
-      card.classList.toggle('ok',d1&&d2);
-      card.classList.toggle('next',!!nxt&&(nxt.k===pr[0]||nxt.k===pr[1]));
-    });
-    $('xInfo').textContent='El x4 se activa sobre '+fmt(S.set.h180)+' puntos y rige hasta fin del año siguiente. El x5, sobre '+fmt(S.set.h350)+', rige en el mismo periodo al cumplirse la meta.';
+    $('xInfoNote').textContent='El x4 se activa sobre '+fmt(S.set.h180)+' puntos y rige hasta fin del año siguiente. El x5, sobre '+fmt(S.set.h350)+', rige en el mismo periodo al cumplirse la meta.';
     var NOM={a50:'el 50% de descuento en administración',x4:'el x4',a100:'la administración gratis',x5:'el x5'};
     $('ptsInfo').textContent=nxt?'Tu próximo objetivo es '+NOM[nxt.k]+': te faltan '+fmt(nxt.val+1-acc)+' puntos.':'Ya cumpliste todos los objetivos de este año.';
     $('hitsNote').textContent=(nxt?'El borde marca tu próximo objetivo. ':'No queda ningún corte por alcanzar este año. ')+
