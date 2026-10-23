@@ -78,6 +78,14 @@ input[type=text]:focus-visible,input[type=date]:focus-visible,button:focus-visib
 .ppart{grid-template-rows:auto minmax(0,1fr)}
 .fitbox{position:relative;min-width:0;min-height:clamp(72px,19vw,92px)}
 .n .fitbox .big{position:absolute;left:0;top:50%;transform:translateY(-50%);width:max-content;line-height:1}
+.fal{display:grid;gap:6px}
+.falg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@container (min-width:520px){.falg{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ft{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;gap:4px;align-content:start;min-width:0}
+.ft .fl{font:600 13px var(--f-body);color:var(--accent)}
+.ft .fn{font:700 clamp(22px,6vw,30px)/1.05 var(--f-display);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--fg)}
+.ft.ok{background:var(--accent-soft);border-color:transparent}
+.ft.ok .pill{background:var(--surface);display:inline-flex;align-items:center;gap:5px;width:fit-content;max-width:100%;white-space:normal}
 #nAcc{color:var(--pts-blue)}
 #nSaldo{color:var(--pts-red)}
 .scrim{position:fixed;inset:0;background:rgba(10,20,15,.5);display:grid;place-items:center;padding:16px;z-index:50}
@@ -291,7 +299,7 @@ details{display:grid;gap:12px}
       <div class="sect">
         <p class="eyebrow" id="misTitle"><span data-tx="t-mis">Mis Fpuntos (1 Fpunto = $1)</span> <span class="tag" id="prov" hidden>con compra sin registrar</span></p>
         <div class="nums" id="cards">
-          <div class="n pts" id="c-acc" data-key="acc"><div class="pbox"><div class="ppart"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><hr class="hdiv"><div class="ppart"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div></div><div class="gbox"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div><div class="gtxt"><span class="wpill" id="ptsInfo"></span></div></div>
+          <div class="n pts" id="c-acc" data-key="acc"><div class="pbox"><div class="ppart"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><hr class="hdiv"><div class="ppart"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div></div><div class="fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span><div class="falg" id="falg"></div></div><div class="gbox"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div><div class="gtxt"><span class="wpill" id="ptsInfo"></span></div></div>
           <div class="n regc" id="c-reg" data-key="reg" aria-label="Registrar una compra">
       <h3 data-tx="t-reg">Registrar una compra</h3>
       <div class="seg" role="group" aria-label="Dónde fue la compra" id="dondeSeg">
@@ -651,6 +659,7 @@ details{display:grid;gap:12px}
       var k=h.k,w=why(h);
       $(PART[k]).classList.toggle('ok',!!w);
       if(w){
+        $('hb-'+k).hidden=false;
         $('hb-'+k).innerHTML='<span class="pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>'+w+'</span>';
         var cy=S.carry,fromCarry=cy&&cy.mult>=(k==='x5'?5:4)&&cy.multHasta&&cy.multHasta>=today()&&String(cy.year)!==S.year;
         $('hs-'+k).textContent=(w==='Ya lo tienes')?(fromCarry?'Ganado en '+cy.year+(k==='x5'?' · duración por confirmar':' · hasta '+dmy(cy.multHasta)):'Lo marcaste en Configurar'):(k==='x5')?'Duración por confirmar con Falabella':'Vigente hasta el 31 de diciembre de '+(Number(S.year)+1);
@@ -659,13 +668,19 @@ details{display:grid;gap:12px}
         var need=h.val+1-acc;
         var gG=gastoPara(acc,h.val+1,S.set.tramoG), gO=gastoPara(acc,h.val+1,S.set.tramoO);
         var pct=Math.max(0,Math.min(100,acc/h.val*100));
-        $('hb-'+k).textContent=fmt(need);
-        $('hs-'+k).textContent='pts faltan · corte sobre '+fmt(h.val);
+        $('hb-'+k).textContent='';$('hb-'+k).hidden=true;
+        $('hs-'+k).textContent='Corte sobre '+fmt(h.val)+' puntos';
         $('hbar-'+k).hidden=false;$('hp-'+k).style.width=pct+'%';
         var by=(h.spend&&gy!=null)?'<div><span>Por gasto CMR</span><b>'+clp(Math.max(0,h.spend-gy)+1)+'</b></div>':'';
         $('hg-'+k).innerHTML='<div><span>Grupo Falabella</span><b>'+clp(gG)+'</b></div><div><span>Otros comercios</span><b>'+clp(gO)+'</b></div>'+by;
       }
     });
+    /* Puntos que faltan: sección de la tarjeta principal, se actualiza con cada monto */
+    var FAL=[['a50','50% de descuento'],['a100','100% de descuento'],['x4','Pasas a x4'],['x5','Pasas a x5']];
+    $('falg').innerHTML=FAL.map(function(f){
+      var h=byK[f[0]],w=why(h);
+      return '<div class="ft'+(w?' ok':'')+'"><span class="fl">'+f[1]+'</span>'+(w?'<span class="pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>'+w+'</span>':'<span class="fn">'+fmt(h.val+1-acc)+'</span>')+'</div>';
+    }).join('');
     /* En cada tarjeta doble, la meta en curso va arriba y la cumplida abajo; con las dos cumplidas, toda la tarjeta en verde */
     [['a50','a100','hc-a50'],['x4','x5','hc-x4']].forEach(function(pr){
       var d1=!!why(byK[pr[0]]),d2=!!why(byK[pr[1]]);
