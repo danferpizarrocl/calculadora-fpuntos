@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B7A52">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Fpuntos">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0}</style>
+<title>Calculadora Fpuntos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: una sola pantalla grande. Arriba los dos totales, en medio el registro de compra que los mueve, abajo los hitos con el gasto de ambos tipos de comercio a la vista. La configuración vive aparte, detrás de un botón. */
+:root{
+  --bg:#F1F5F2; --surface:#FFFFFF; --fg:#13221B; --muted:#58695F; --line:#D5DFD9;
+  --accent:#0B7A52; --accent-fg:#FFFFFF; --accent-soft:#DCF0E6;
+  --amber:#9A5B00; --amber-soft:#FBEBCB; --pts-blue:#3F8FD6; --pts-red:#D46A6A;
+  --f-display:'Bricolage Grotesque',system-ui,sans-serif;
+  --f-body:'Figtree',system-ui,sans-serif;
+  --f-data:'IBM Plex Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C1411; --surface:#142019; --fg:#E6F0EA; --muted:#92A69B; --line:#25352D;
+    --accent:#3FD39B; --accent-fg:#04140D; --accent-soft:#15382B;
+    --amber:#F2B25C; --amber-soft:#3A2A0E; --pts-blue:#7DB7F0; --pts-red:#F09A9A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C1411; --surface:#142019; --fg:#E6F0EA; --muted:#92A69B; --line:#25352D;
+  --accent:#3FD39B; --accent-fg:#04140D; --accent-soft:#15382B;
+  --amber:#F2B25C; --amber-soft:#3A2A0E; --pts-blue:#7DB7F0; --pts-red:#F09A9A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  background:var(--bg); color:var(--fg); font-family:var(--f-body); font-size:15px; line-height:1.5;
+  padding-block:20px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.wrap{max-width:720px;margin:0 auto;display:grid;gap:14px}
+h1,h2,h3,p{margin:0}
+h1{font-family:var(--f-display);font-size:30px;line-height:1.1;font-weight:700;text-wrap:balance}
+h2{font-family:var(--f-display);font-size:20px;line-height:1.2;font-weight:600;text-wrap:balance}
+h3{font-family:var(--f-display);font-size:18px;line-height:1.2;font-weight:600}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.head button{flex:none}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:14px;min-width:0}
+.field{display:grid;gap:6px;min-width:0}
+label,.lab{font-weight:600;font-size:14px}
+small{color:var(--muted);font-size:13px}
+input[type=text],input[type=date]{
+  width:100%;font:500 18px var(--f-data);padding:11px 12px;border-radius:10px;
+  border:1px solid var(--line);background:var(--bg);color:var(--fg);font-variant-numeric:tabular-nums;min-width:0;
+}
+input[type=text]:focus-visible,input[type=date]:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg)}
+.seg button{font:600 14px var(--f-body);padding:10px 8px;border:0;background:transparent;color:var(--muted);cursor:pointer;min-width:0}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.note{color:var(--muted);font-size:13px}
+.warn{background:var(--amber-soft);color:var(--amber);border-radius:10px;padding:10px 12px;font-size:14px;font-weight:500}
+.tag{display:inline-block;font:600 12px var(--f-body);padding:3px 9px;border-radius:99px;background:var(--amber-soft);color:var(--amber);text-transform:none;letter-spacing:0}
+.pill{display:inline-block;font:600 12px var(--f-body);padding:3px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+
+/* Panel principal */
+.panel{background:var(--accent-soft);border-color:transparent;gap:18px}
+.panel .eyebrow{color:var(--accent)}
+#nAcc{color:var(--pts-blue)}
+#nSaldo{color:var(--pts-red)}
+.scrim{position:fixed;inset:0;background:rgba(10,20,15,.5);display:grid;place-items:center;padding:16px;z-index:50}
+.dlg{background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:14px;padding:18px;width:min(340px,100%);display:grid;gap:10px;box-shadow:0 12px 40px rgba(0,0,0,.35)}
+.dlg h2{margin:0;font:700 18px var(--f-display)}
+.dlg p{margin:0;font:400 14px/1.45 var(--f-body);color:var(--muted)}
+.dlgb{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.dlgb button{min-height:42px;border-radius:10px;font:700 14px var(--f-body);cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+.dlgb button.dng{background:var(--pts-red);border-color:var(--pts-red);color:#fff}
+#misTitle{font-size:24px;font-weight:800;line-height:1.1;letter-spacing:.02em}
+.sect{display:grid;gap:12px;min-width:0}
+.sect+.sect{border-top:1px solid var(--line);padding-top:18px}
+.nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.nums{grid-auto-flow:dense}
+.nums>.sz2{grid-column:span 2}
+.nums>.sz3{grid-column:1/-1}
+.blocks{display:grid;gap:14px;min-width:0}
+.n{background:var(--surface);border-radius:12px;padding:12px;min-width:0;display:grid;gap:4px;align-content:start}
+.n .big{font-family:var(--f-display);font-weight:700;font-size:clamp(22px,6vw,30px);line-height:1.05;font-variant-numeric:tabular-nums;overflow-wrap:normal;white-space:nowrap}
+.n .calc{font:400 12px var(--f-data);color:var(--muted);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.ladder{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.step{border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center;background:var(--surface);color:var(--muted);min-width:0}
+.step b{font:700 20px var(--f-display);display:block;line-height:1.2}
+.step small{display:block;font-size:12px}
+.step.on{color:var(--fg)}
+.step.cur{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.step.cur small{color:var(--accent-fg)}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:var(--surface);border-radius:10px;padding:12px;min-width:0}
+.stat .eyebrow{display:block;margin-bottom:4px;color:var(--muted)}
+.stat .v{font-family:var(--f-display);font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.panel input[type=text],.panel input[type=date]{background:var(--surface)}
+.panel .seg{background:var(--surface)}
+button.ico{width:42px;height:42px;display:grid;place-items:center;padding:0;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+button.ico svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+h2 .h2ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px;margin-right:4px}
+button.ico[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.money{position:relative}
+.money>span{position:absolute;left:12px;top:50%;transform:translateY(-50%);font:500 18px var(--f-data);color:var(--muted);pointer-events:none}
+.money>input{padding-left:28px}
+.hc .eyebrow{text-transform:none;letter-spacing:0;font-size:13px}
+.calc.soon{color:var(--amber);font-weight:600}
+select{width:100%;font:500 18px var(--f-data);padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);min-width:0}
+select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hc{display:flex;flex-direction:column;gap:4px}
+.n.pts{display:flex;flex-direction:column;gap:8px}
+.gtxt{margin-top:auto;background:var(--accent-soft);border-radius:10px;padding:8px;font:600 13px/1.5 var(--f-body);color:var(--accent);order:5;min-width:0}
+.hc>.gtxt{margin-top:auto}
+.wpill{display:block;background:var(--surface);border-radius:12px;padding:6px 10px;font:600 12px/1.45 var(--f-body);color:var(--accent)}
+.hc>.pbox,.hc>.hpart{flex:none}
+.hpart{display:grid;gap:4px;order:0;min-width:0;grid-template-columns:minmax(0,1fr)}
+#blk-ben h2,#blk-compras h2{text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:2px;text-underline-offset:6px}
+.n.pts{container-type:inline-size}
+.gbox{display:grid;gap:4px;background:var(--accent-soft);border-radius:10px;padding:8px;min-width:0}
+.n .gbox .calc{font:600 13px/1.5 var(--f-body);letter-spacing:normal;text-transform:none;font-style:normal;color:var(--accent)}
+.gbox .calc.soon{color:var(--amber)}
+.gbox .calc:empty{display:none}
+.pbox{display:grid;grid-template-columns:minmax(0,1fr);gap:4px}
+.ppart{display:grid;gap:4px;min-width:0;align-content:start}
+.pbox>.hdiv{order:0}
+@container (min-width:400px){
+  .pbox{grid-template-columns:1fr 1fr;column-gap:16px}
+  .pbox>.hdiv{display:none}
+  .pbox>.ppart+.ppart{border-left:1px solid var(--line);padding-left:16px}
+}
+.n .calc,.hc .calc,.panel .note{font-style:italic}
+.hdiv{order:1;border:0;border-top:1px solid var(--line);margin:8px 0;width:100%}
+.hpart.low{order:2}
+.hpart.ok{background:var(--accent-soft);border-radius:10px;padding:8px}
+.hpart.ok .pill{background:var(--surface);display:inline-flex;align-items:center;gap:5px;width:fit-content;max-width:100%;white-space:normal}
+.pill svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.hc.ok{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.hc .hpart .big{font-size:clamp(22px,6vw,30px)}
+.hc.next{outline:2px solid var(--accent);outline-offset:-2px}
+.hc .bar{background:var(--bg);margin-top:2px}
+#c-reg .stat,#c-reg input,#c-reg .seg{background:var(--bg)}
+.regc{gap:12px}
+.sp{display:grid;gap:2px;margin-top:2px}
+.sp div{display:flex;flex-wrap:wrap;justify-content:space-between;gap:0 8px;font-size:13px;color:var(--muted)}
+.sp b{font:600 13px var(--f-data);color:var(--fg);font-variant-numeric:tabular-nums}
+.mv{display:none}
+.editing .mv{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;min-width:0}
+.mv button{width:40px;height:40px;display:grid;place-items:center;padding:0;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer}
+.mv button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mv .grip{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.mv .grip svg{fill:currentColor;stroke:none}
+.editing [data-key]{outline:1px dashed var(--line);outline-offset:2px}
+.editing [data-tx]{outline:1px dashed var(--accent);outline-offset:2px;border-radius:4px;cursor:text;min-width:1ch}
+.dragging{opacity:.45}
+.db{box-shadow:-5px 0 0 var(--accent)}
+.da{box-shadow:5px 0 0 var(--accent)}
+.list-mode>.db{box-shadow:0 -5px 0 var(--accent)}
+.list-mode>.da{box-shadow:0 5px 0 var(--accent)}
+.editbar{background:var(--accent-soft);border-color:transparent}
+.editbar .acts{display:flex;gap:8px;flex-wrap:wrap}
+button.primary{font:600 15px var(--f-body);padding:13px 14px;border-radius:10px;border:0;background:var(--accent);color:var(--accent-fg);cursor:pointer;width:100%}
+button.primary:disabled{opacity:.45;cursor:not-allowed}
+
+/* Hitos */
+ul.hits{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.hit{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:8px;min-width:0}
+.hit.next{border:2px solid var(--accent);padding:11px}
+.hit.done{gap:2px}
+.hh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hh b{font:500 18px var(--f-data);font-variant-numeric:tabular-nums}
+.need{font:500 14px var(--f-data);color:var(--accent);font-variant-numeric:tabular-nums}
+.hit .t{color:var(--muted);font-size:13px}
+.bar{height:8px;border-radius:99px;background:var(--bg);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px;width:0}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .4s ease}}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cols>div{background:var(--bg);border-radius:8px;padding:8px 10px;min-width:0}
+.cols small{display:block}
+.cols strong{font:700 17px var(--f-display);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+
+/* Compras registradas */
+ul.hitos{list-style:none;margin:0;padding:0}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:12px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0;padding-top:0}
+.row b{font-family:var(--f-data);font-weight:500;font-size:16px;font-variant-numeric:tabular-nums}
+.row .t{color:var(--muted);font-size:13px;grid-column:1}
+.row .r{grid-column:2;grid-row:1/span 2;text-align:right;font-variant-numeric:tabular-nums;font-family:var(--f-data);font-size:14px}
+.row .r small{display:block;font-family:var(--f-body)}
+.row .acts{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+button.mini{font:600 13px var(--f-body);padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+button.ghost{font:600 14px var(--f-body);padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+details summary{cursor:pointer;font-family:var(--f-display);font-weight:600;font-size:16px}
+details{display:grid;gap:12px}
+.newyear{background:var(--amber-soft);border-color:transparent}
+.newyear h2,.newyear .note{color:var(--amber)}
+.foot{color:var(--muted);font-size:13px}
+.foot a{color:var(--accent)}
+</style>
+
+<main class="wrap">
+  <header class="head">
+    <div>
+      <p class="eyebrow"><span data-tx="eyebrow">Tarjeta CMR Elite</span> · <span id="yearTag"></span></p>
+      <h1 data-tx="titulo">Calculadora Fpuntos</h1>
+    </div>
+    <div class="hbtns">
+      <button type="button" class="ico" id="editBtn" aria-pressed="false" aria-label="Editar" title="Editar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/><path d="M13.5 6.5l4 4"/></svg></button>
+      <button type="button" class="ico" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema"></button>
+      <button type="button" class="ico" id="fsBtn" aria-label="Pantalla completa" title="Pantalla completa" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8v-2a2 2 0 0 1 2 -2h2"/><path d="M4 16v2a2 2 0 0 0 2 2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M16 20h2a2 2 0 0 0 2 -2v-2"/></svg></button>
+      <button type="button" class="ico" id="cfgBtn" aria-expanded="false" aria-controls="cfg" aria-label="Configurar" title="Configurar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    </div>
+  </header>
+
+  <section class="card editbar" id="editBar" hidden aria-label="Modo edición">
+    <p class="note"><b>Modo edición.</b> Arrastra la manilla de cada tarjeta o sección, o usa las flechas. El botón con el rectángulo cambia el tamaño de la tarjeta: chica, mediana o ancha. Toca un texto para cambiarlo. Los montos y los cálculos no se editan.</p>
+    <div class="acts">
+      <button type="button" class="mini" id="rstOrder">Restaurar orden y tamaños</button>
+      <button type="button" class="mini" id="rstTx">Restaurar textos</button>
+    </div>
+  </section>
+
+  <section class="card newyear" id="newYear" aria-label="Nuevo año" hidden>
+    <h2 id="nyTitle"></h2>
+    <p class="note" id="nyText"></p>
+    <button type="button" class="primary" id="nyBtn"></button>
+  </section>
+
+  <section class="card" id="cfg" aria-label="Configurar puntos iniciales" hidden>
+    <h2><svg class="h2ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"/><circle cx="12" cy="12" r="3"/></svg> Configurar puntos iniciales</h2>
+    <p class="note">Copia estos números de la página web de Falabella. Las compras que registres se suman encima.</p>
+    <div class="field">
+      <label for="acc">Fpuntos acumulados en el año, según la página web (punto de inicio)</label>
+      <input id="acc" type="text" inputmode="numeric" autocomplete="off">
+      <small>Es tu punto de partida: la app cuenta desde este número. Es el acumulado del año calendario, desde el 1 de enero. Puedes cambiarlo cada vez que lo revises en la página.</small>
+    </div>
+    <div class="field">
+      <label for="saldo">Saldo disponible para canjear, según la página web (se va modificando)</label>
+      <input id="saldo" type="text" inputmode="numeric" autocomplete="off" placeholder="0">
+      <small>Este número va cambiando, así que actualízalo cada vez que lo revises en la página. Cada Fpunto vale $1 al canjear.</small>
+    </div>
+    <div class="field">
+      <span class="lab" id="lblVence">Mi saldo vence en</span>
+      <div class="grid2" role="group" aria-labelledby="lblVence">
+        <select id="venceMes" aria-label="Mes de vencimiento"><option value="1">enero</option><option value="2">febrero</option><option value="3">marzo</option><option value="4">abril</option><option value="5">mayo</option><option value="6">junio</option><option value="7">julio</option><option value="8">agosto</option><option value="9">septiembre</option><option value="10">octubre</option><option value="11">noviembre</option><option value="12">diciembre</option></select>
+        <input id="venceAnio" type="text" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="2028" aria-label="Año de vencimiento">
+      </div>
+      <small>Todo tu saldo, incluidos los puntos que sigas sumando, vence en esa fecha. Pon el mes y el año que te muestra Falabella. Para quitar el aviso, borra el año.</small>
+    </div>
+    <div class="field">
+      <span class="lab" id="lblMult">Mi multiplicador</span>
+      <div class="seg" role="group" aria-labelledby="lblMult" id="multSeg">
+        <button type="button" data-m="3">x3</button>
+        <button type="button" data-m="4">x4</button>
+        <button type="button" data-m="5">x5</button>
+      </div>
+      <small>Sube solo al pasar los 180.000 y los 350.000. Si ya tienes x4 o x5 de otro año, márcalo.</small>
+    </div>
+    <div class="field">
+      <label for="gasto">Compras del año con la CMR, en pesos (opcional)</label>
+      <div class="money"><span aria-hidden="true">$</span><input id="gasto" type="text" inputmode="numeric" autocomplete="off" placeholder="0"></div>
+      <small>Sirve para ver el camino por gasto en el descuento de administración.</small>
+    </div>
+    <details>
+      <summary>Ajustes de cifras</summary>
+      <p class="note">Si Falabella cambia algún valor, edítalo aquí.</p>
+      <div class="grid2" id="settings"></div>
+      <button type="button" class="ghost" id="reset">Volver a las cifras originales</button>
+    </details>
+    <p class="note" id="syncStat"></p>
+  </section>
+
+  <div class="blocks list-mode" id="blocks">
+    <section class="card panel" id="blk-cards" data-key="cards" aria-live="polite" aria-label="Mis Fpuntos">
+      <div class="sect">
+        <p class="eyebrow" id="misTitle"><span data-tx="t-mis">Mis Fpuntos (1 Fpunto = $1)</span> <span class="tag" id="prov" hidden>con compra sin registrar</span></p>
+        <div class="nums" id="cards">
+          <div class="n pts" id="c-acc" data-key="acc"><div class="pbox"><div class="ppart"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><span class="big" id="nAcc"></span></div><hr class="hdiv"><div class="ppart"><span class="eyebrow" data-tx="t-saldo">Saldo disponible</span><span class="big" id="nSaldo"></span><div class="gbox"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div></div></div><div class="gtxt"><span class="wpill" id="ptsInfo"></span></div></div>
+          <div class="n regc" id="c-reg" data-key="reg" aria-label="Registrar una compra">
+      <h3 data-tx="t-reg">Registrar una compra</h3>
+      <div class="seg" role="group" aria-label="Dónde fue la compra" id="dondeSeg">
+        <button type="button" data-d="g">Grupo Falabella</button>
+        <button type="button" data-d="o">Otros comercios</button>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label for="fecha">Fecha</label>
+          <input id="fecha" type="date">
+        </div>
+        <div class="field">
+          <label for="monto">Monto, en pesos</label>
+          <div class="money"><span aria-hidden="true">$</span><input id="monto" type="text" inputmode="numeric" autocomplete="off" placeholder="0"></div>
+        </div>
+      </div>
+      <div class="pair" id="conv"></div>
+      <p class="note" id="convNote"></p>
+      <p class="warn" id="otroWarn" hidden></p>
+      <button type="button" class="primary" id="reg">Registrar compra con la CMR</button>
+    </div>
+          <div class="n hc" id="hc-a50" data-key="a50"><div class="hpart" id="part-a50"><span class="eyebrow" data-tx="t-a50">50% de descuento en administración</span><span class="big" id="hb-a50"></span><span class="calc" id="hs-a50"></span><div class="bar" id="hbar-a50"><i id="hp-a50"></i></div><div class="sp" id="hg-a50"></div></div><hr class="hdiv"><div class="hpart" id="hc-a100"><span class="eyebrow" data-tx="t-a100">100% de descuento: administración gratis</span><span class="big" id="hb-a100"></span><span class="calc" id="hs-a100"></span><div class="bar" id="hbar-a100"><i id="hp-a100"></i></div><div class="sp" id="hg-a100"></div></div></div>
+          <div class="n hc" id="hc-x4" data-key="x4"><div class="hpart" id="part-x4"><span class="eyebrow" data-tx="t-x4">Pasas a x4 en todas tus compras</span><span class="big" id="hb-x4"></span><span class="calc" id="hs-x4"></span><div class="bar" id="hbar-x4"><i id="hp-x4"></i></div><div class="sp" id="hg-x4"></div></div><hr class="hdiv"><div class="hpart" id="part-x5"><span class="eyebrow" data-tx="t-x5">Pasas a x5 en todas tus compras</span><span class="big" id="hb-x5"></span><span class="calc" id="hs-x5"></span><div class="bar" id="hbar-x5"><i id="hp-x5"></i></div><div class="sp" id="hg-x5"></div></div><div class="gtxt"><span class="wpill" id="xInfo"></span></div></div>
+        </div>
+        <div class="ladder" id="ladder"></div>
+        <p class="note" id="ladderNote"></p>
+        <p class="note" id="hitsNote"></p>
+        <p class="note" id="startNote"></p>
+      </div>
+    </section>
+
+
+    <section class="card" id="blk-ben" data-key="ben" aria-label="Beneficios vigentes">
+      <h2 data-tx="t-ben">Beneficios vigentes</h2>
+      <ul class="hitos" id="benef"></ul>
+      <p class="note">Las fechas salen de las reglas oficiales: el descuento de administración dura hasta el 31 de diciembre del año siguiente, y el x4 se mantiene todo el año siguiente. Qué pasa después de eso no está confirmado, revísalo con Falabella.</p>
+    </section>
+
+    <section class="card" id="blk-compras" data-key="compras" aria-label="Compras registradas">
+      <h2 data-tx="t-compras">Compras registradas</h2>
+      <ul class="hitos" id="compras"></ul>
+      <p class="note">Las compras por abonar suman a tus puntos, a tu saldo y a tu gasto del año. Cuando una aparezca en la app, actualiza arriba, en Configurar, tus puntos con el número oficial y márcala como abonada, así no se cuenta doble.</p>
+    </section>
+  </div>
+
+  <details class="card" id="histBox" hidden>
+    <summary>Años cerrados</summary>
+    <ul class="hitos" id="hist"></ul>
+  </details>
+
+  <p class="foot">Los cortes piden superar la cifra, por eso cuento un punto extra. Cifras vigentes desde el 14 de septiembre de 2026. Verifícalas en el <a href="https://www.fpuntos.cl/reglamento-fpuntos-vigente" target="_blank" rel="noopener">reglamento oficial</a> y en <a href="https://www.bancofalabella.cl/fpuntos" target="_blank" rel="noopener">Banco Falabella</a>.</p>
+</main>
+
+<div class="scrim" id="dlg" hidden><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgT"><h2 id="dlgT">¿Borrar esta compra?</h2><p id="dlgD"></p><div class="dlgb"><button type="button" id="dlgNo">Cancelar</button><button type="button" class="dng" id="dlgYes">Sí, borrar</button></div></div></div>
+
+<script>
+(function(){
+  /* BASE PARA SEGUIR MODIFICANDO
+     Estado (S, guardado en localStorage con la clave KEY):
+       acc, saldo, gasto  números según la app, más gasto del año con la CMR
+       mult               multiplicador marcado (3, 4 o 5)
+       compras[]          {id,fecha,monto,donde,m,m2,pts,ab,otro}; ab = ya abonada, otro = fecha de otro año
+       year               año al que pertenecen los contadores (si es distinto del actual, sale el aviso de cierre)
+       hist[]             años cerrados {year,acc,gasto,mult,earned,disc,compras}
+       carry              beneficios ganados el año anterior {year,mult,multHasta,disc,discHasta}
+       set                cifras editables (DEF)
+     Reglas (Fpuntos desde el 14-sep-2026):
+       tramos 1 punto por $150 grupo y $300 otros, por el multiplicador; x4 sobre 180.000 y x5 sobre 350.000 en el año
+       administración 50% sobre 80.000 puntos o $6.600.000; $0 sobre 220.000 o $18.000.000
+       el descuento parte el mes siguiente y dura hasta el 31-dic del año siguiente; el x4 dura lo que queda del año y todo el siguiente
+     Sin confirmar: duración del x5, si el contador vuelve a 0 el 1 de enero, cómo se renueva el x4 el tercer año. */
+  var DEF={tramoG:150,tramoO:300,h80:80000,h180:180000,h220:220000,h350:350000,g50:6600000,g100:18000000};
+  var KEY='fpuntos-calc-v2';
+  var S={acc:115874,saldo:75626,gasto:null,mult:3,donde:'g',compras:[],year:null,hist:[],carry:null,theme:null,tx:{},order:null,sizes:{},vence:{mes:3,anio:2028},set:Object.assign({},DEF)};
+  try{
+    var raw=localStorage.getItem(KEY);
+    if(raw){var o=JSON.parse(raw);S=Object.assign(S,o);S.set=Object.assign({},DEF,o.set||{});}
+  }catch(e){}
+  if(!Array.isArray(S.compras))S.compras=[];
+  if(!Array.isArray(S.hist))S.hist=[];
+  if(!S.tx||typeof S.tx!=='object')S.tx={};
+  if(!S.sizes||typeof S.sizes!=='object')S.sizes={};
+  if(!S.vence||typeof S.vence!=='object')S.vence={mes:1,anio:null};
+  delete S.sampleAcc;delete S.sampleMonto;delete S.tab;
+  S.monto=null;
+  /* Sincronización entre dispositivos: la capacidad db de Claude guarda una copia privada del estado en tu cuenta (data/users/<id>/fpuntos).
+     S._t = momento del último cambio real; gana la copia con _t más nuevo. Si db no está disponible, todo sigue en este dispositivo. */
+  var sync={on:false,ready:false,doc:null,pushing:false,again:false,timer:null};
+  function strip(j){var o=JSON.parse(j);delete o._t;delete o.monto;return JSON.stringify(o);}
+  function snapJson(){var c=Object.assign({},S);delete c._t;delete c.monto;return JSON.stringify(c);}
+  var lastJson=snapJson();
+  function persist(){try{var c=Object.assign({},S);delete c.monto;localStorage.setItem(KEY,JSON.stringify(c));}catch(e){}}
+  function setStat(t){var e=document.getElementById('syncStat');if(e)e.textContent=t;}
+  function queuePush(){clearTimeout(sync.timer);sync.timer=setTimeout(doPush,700);}
+  function doPush(){
+    if(!sync.doc)return;
+    if(sync.pushing){sync.again=true;return;}
+    sync.pushing=true;
+    var c=Object.assign({},S);delete c.monto;
+    sync.doc.set({json:JSON.stringify(c),t:S._t||Date.now()})
+      .then(function(){setStat('Sincronizado con tu cuenta de Claude: los cambios se ven en tus otros dispositivos.');})
+      .catch(function(){setStat('No se pudo sincronizar ahora. Tus datos siguen guardados en este dispositivo.');})
+      .then(function(){sync.pushing=false;if(sync.again){sync.again=false;doPush();}});
+  }
+  function save(){
+    try{
+      var j=snapJson();
+      if(j!==lastJson){
+        lastJson=j;
+        if(sync.ready){S._t=Date.now();if(sync.on)queuePush();}
+      }
+      persist();
+    }catch(e){}
+  }
+  function adopt(d){
+    var a=document.activeElement;
+    var busy=document.body.classList.contains('editing')||(a&&(/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)||a.isContentEditable));
+    if(busy){setTimeout(function(){adopt(d);},2500);return;}
+    try{
+      var n=JSON.parse(sessionStorage.getItem('fp-rl')||'[]').filter(function(x){return Date.now()-x<30000;});
+      if(n.length>=3)return;
+      n.push(Date.now());sessionStorage.setItem('fp-rl',JSON.stringify(n));
+    }catch(e){}
+    try{
+      var o=JSON.parse(d.json);o._t=+d.t||0;delete o.monto;
+      localStorage.setItem(KEY,JSON.stringify(o));
+      location.reload();
+    }catch(e){}
+  }
+  function onRemote(snap){
+    var first=!sync.ready;
+    var d=snap.exists?snap.data():null;
+    if(!d||typeof d.json!=='string'){
+      if(first){sync.ready=true;S._t=Date.now();persist();doPush();}
+      return;
+    }
+    var rt=+d.t||0,lt=+S._t||0,rj;
+    try{rj=strip(d.json);}catch(e){sync.ready=true;return;}
+    sync.ready=true;
+    if(rj===snapJson()){if(rt>lt){S._t=rt;persist();}setStat('Sincronizado con tu cuenta de Claude: los cambios se ven en tus otros dispositivos.');return;}
+    if(rt>lt){adopt(d);}
+    else if(lt>rt&&first){doPush();}
+  }
+  function startSync(){
+    var T=setTimeout(function(){sync.ready=true;},12000);
+    try{
+      if(!window.claude||!window.claude.use){sync.ready=true;clearTimeout(T);setStat('Tus datos se guardan solo en este dispositivo.');return;}
+      Promise.all([window.claude.use('db'),window.claude.use('user')]).then(function(r){
+        var db=r[0],user=r[1];
+        return (user&&user.id?user.id():Promise.resolve(null)).then(function(id){
+          clearTimeout(T);
+          if(!db||!id){sync.ready=true;setStat('Tus datos se guardan solo en este dispositivo. Para sincronizar, abre la app con tu sesión de Claude iniciada.');return;}
+          sync.doc=db.doc('data/users/'+id+'/fpuntos');sync.on=true;
+          sync.doc.onSnapshot(onRemote,function(){sync.ready=true;sync.on=false;setStat('No se pudo sincronizar ahora. Tus datos siguen guardados en este dispositivo.');});
+        });
+      }).catch(function(){clearTimeout(T);sync.ready=true;setStat('Tus datos se guardan solo en este dispositivo.');});
+    }catch(e){sync.ready=true;}
+  }
+
+  var nf=new Intl.NumberFormat('es-CL');
+  var fmt=function(n){return nf.format(Math.round(n));};
+  var clp=function(n){return '$'+fmt(n);};
+  var num=function(v){var d=String(v).replace(/\D/g,'');return d===''?null:parseInt(d,10);};
+  var $=function(id){return document.getElementById(id);};
+  function today(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
+  var YEAR=String(new Date().getFullYear());
+  if(!S.year)S.year=YEAR;
+
+  function pend(){return S.compras.filter(function(c){return !c.ab&&!c.otro;});}
+  function sumP(k){return pend().reduce(function(s,c){return s+c[k];},0);}
+
+  function mAt(q,base,strict){
+    var m=base,a=S.set.h180,b=S.set.h350;
+    if(strict?q>a:q>=a)m=Math.max(m,4);
+    if(strict?q>b:q>=b)m=Math.max(m,5);
+    return m;
+  }
+  function gastoPara(from,to,tramo){
+    var cur=from,sum=0,guard=0;
+    while(cur<to&&guard++<10){
+      var m=mAt(cur,S.mult,false);
+      var nb=[[S.set.h180,4],[S.set.h350,5]].filter(function(x){return x[0]>cur&&x[1]>m;}).map(function(x){return x[0];});
+      var e=Math.min(to,nb.length?Math.min.apply(null,nb):Infinity);
+      sum+=(e-cur)*tramo/m;cur=e;
+    }
+    return Math.ceil(sum);
+  }
+  function hitos(){
+    var s=S.set;
+    return [
+      {k:'a50',val:s.h80,t:'50% de descuento en administración',spend:s.g50},
+      {k:'x4',val:s.h180,t:'Pasas a x4 en todas tus compras'},
+      {k:'a100',val:s.h220,t:'Administración en $0',spend:s.g100},
+      {k:'x5',val:s.h350,t:'Pasas a x5 en todas tus compras'}
+    ].sort(function(a,b){return a.val-b.val;});
+  }
+  /* Puntos de una compra partida en el corte: cada tramo cerrado se paga con el multiplicador vigente; el tramo que cruza el corte queda con el multiplicador anterior. */
+  function ptsCompra(base,tramos){
+    var cur=base,pts=0,t=tramos,guard=0;
+    while(t>0&&guard++<10){
+      var m=mAt(cur,S.mult,true);
+      var nb=[[S.set.h180,4],[S.set.h350,5]].filter(function(x){return x[0]>=cur&&x[1]>m;}).map(function(x){return x[0];});
+      if(!nb.length){pts+=t*m;break;}
+      var b=Math.min.apply(null,nb);
+      var k=Math.floor((b-cur)/m)+1;
+      if(k>=t){pts+=t*m;break;}
+      pts+=k*m;cur+=k*m;t-=k;
+    }
+    return pts;
+  }
+  function draft(){
+    var monto=S.monto||0;
+    var f=$('fecha').value||today();
+    var tramo=S.donde==='g'?S.set.tramoG:S.set.tramoO;
+    var base=(S.acc||0)+sumP('pts');
+    var m=mAt(base,S.mult,true);
+    var tramos=Math.floor(monto/tramo);
+    var pts=ptsCompra(base,tramos);
+    var m2=mAt(base+pts,S.mult,true);
+    return {monto:monto,fecha:f,tramo:tramo,m:m,m2:m2,tramos:tramos,pts:pts,exact:pts+(monto-tramos*tramo)/tramo*m2,otro:f.slice(0,4)!==YEAR,active:monto>0};
+  }
+  function dmy(s){return s.split('-').reverse().join('-');}
+  /* Nivel de descuento de administración que dan estos números: 0, 50 o 100 */
+  function discLevel(acc,gy){
+    if(acc>=S.set.h220||(gy!=null&&gy>=S.set.g100))return 100;
+    if(acc>S.set.h80||(gy!=null&&gy>=S.set.g50))return 50;
+    return 0;
+  }
+  /* Beneficios que rigen hoy, con la fecha hasta la que duran */
+  function benefits(acc,gy){
+    var L=[],t=today(),Y=S.year,y=Number(Y);
+    function discRow(d,hasta,origen){
+      return {t:d===100?'Administración en $0':'50% de descuento en administración',s:'Ganado en '+origen,h:'hasta '+dmy(hasta)};
+    }
+    var d=discLevel(acc,gy);
+    if(d)L.push(discRow(d,(y+1)+'-12-31',Y));
+    var c=S.carry;
+    if(c&&c.disc&&c.discHasta>=t&&String(c.year)!==Y&&c.disc>d)L.push(discRow(c.disc,c.discHasta,c.year));
+    var earned=acc>S.set.h350?5:acc>S.set.h180?4:3;
+    var cm=(c&&c.mult>=4&&c.multHasta>=t&&String(c.year)!==Y)?c.mult:3;
+    var mRow;
+    if(earned>=4&&earned>=cm){
+      mRow={t:'Multiplicador x'+earned,s:'Ganado en '+Y,h:earned===5?'duración por confirmar':'hasta '+dmy((y+1)+'-12-31')};
+    }else if(cm>=4){
+      mRow={t:'Multiplicador x'+cm,s:'Ganado en '+c.year,h:cm===5?'duración por confirmar':'hasta '+dmy(c.multHasta)};
+    }else if(S.mult>=4){
+      mRow={t:'Multiplicador x'+S.mult,s:'Lo marcaste tú en Configurar',h:'sin fecha'};
+    }else{
+      mRow={t:'Multiplicador x3',s:'Por tener la CMR Elite',h:'con tu tarjeta'};
+    }
+    L.unshift(mRow);
+    return L;
+  }
+  /* Cierra el año de los contadores y deja los del año actual en blanco */
+  function closeYear(){
+    var pp=sumP('pts');
+    var acc=(S.acc||0)+pp;
+    var gy=S.gasto==null?null:S.gasto+sumP('monto');
+    var disc=discLevel(acc,gy),y=Number(S.year);
+    var earned=acc>S.set.h350?5:acc>S.set.h180?4:3;
+    S.hist.unshift({year:S.year,acc:acc,gasto:gy,mult:S.mult,earned:earned,disc:disc,compras:S.compras.length});
+    S.carry={year:S.year,mult:earned>=4?earned:3,multHasta:earned>=4?(y+1)+'-12-31':null,disc:disc,discHasta:disc?(y+1)+'-12-31':null};
+    S.saldo=(S.saldo==null&&!pend().length)?null:(S.saldo||0)+pp;
+    S.acc=0;S.gasto=null;S.compras=[];
+    S.mult=earned>=4?earned:3;
+    S.year=YEAR;
+  }
+
+  function render(){
+    var d=draft();
+    var ny=S.year!==YEAR;
+    var counts=d.active&&!d.otro;
+    var np=pend().length;
+    var pp=sumP('pts');
+    var acc=(S.acc||0)+pp+(counts?d.pts:0);
+    var gy=S.gasto==null?null:S.gasto+sumP('monto')+(counts?d.monto:0);
+    var m=mAt(acc,S.mult,true);
+    var H=hitos();
+
+    document.querySelectorAll('#multSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(+b.dataset.m===S.mult));});
+    document.querySelectorAll('#dondeSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.d===S.donde));});
+
+    /* Totales */
+    $('prov').hidden=!counts;
+    $('nAcc').textContent=fmt(acc);
+    $('startNote').textContent='Los puntos del año parten desde la cantidad de '+fmt(S.acc||0)+', registrada en Configuración, que corresponde a lo que figura en la app de Falabella. A ese valor se le suman las compras que registres aquí. Si necesitas corregirlo, puedes modificarlo cuando quieras desde el engranaje.';
+    var sBase=(S.saldo==null&&!np)?null:(S.saldo||0)+pp;
+    var sTot=(sBase==null&&!counts)?null:(sBase||0)+(counts?d.pts:0);
+    $('nSaldo').textContent=sTot==null?'—':fmt(sTot);
+    $('nSaldoCalc').textContent=sTot==null?'Agrégalo en Configurar':('Al canjear, tu saldo disponible equivale a '+clp(sTot)+'.');
+
+    /* Vencimiento de parte del saldo */
+    var v=S.vence,ve=$('nSaldoVence');
+    if(sTot!=null&&v&&v.anio>2000&&v.mes>=1&&v.mes<=12){
+      var MES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+      var nowD=new Date(),diff=(v.anio*12+v.mes)-(nowD.getFullYear()*12+nowD.getMonth()+1);
+      ve.textContent='Estos puntos vencen en '+MES[v.mes-1]+' de '+v.anio+(diff>0?', es decir, dentro de '+(diff===1?'1 mes.':diff+' meses.'):diff===0?', es decir, este mismo mes.':', plazo que ya se cumplió.');
+      ve.classList.toggle('soon',diff<3);
+    }else{ve.textContent='';ve.classList.remove('soon');}
+
+    /* Multiplicador */
+    var steps=[[3,'base'],[4,'sobre '+fmt(S.set.h180)],[5,'sobre '+fmt(S.set.h350)]];
+    $('ladder').innerHTML=steps.map(function(s){
+      var cls='step'+(s[0]<=m?' on':'')+(s[0]===m?' cur':'');
+      return '<div class="'+cls+'"><b>x'+s[0]+'</b><small>'+(s[0]===m?'tu nivel':s[1])+'</small></div>';
+    }).join('');
+    $('ladderNote').textContent='Con x'+m+', cada Fpunto te cuesta '+clp(S.set.tramoG/m)+' en el grupo Falabella y '+clp(S.set.tramoO/m)+' en otros comercios.';
+
+    /* Formulario */
+    if(d.active){
+      $('conv').innerHTML=
+        '<div class="stat"><span class="eyebrow">Por tramo cerrado</span><span class="v">'+fmt(d.pts)+' pts</span></div>'+
+        '<div class="stat"><span class="eyebrow">Exacto</span><span class="v">'+d.exact.toLocaleString('es-CL',{maximumFractionDigits:2})+' pts</span></div>';
+      $('convNote').textContent=d.tramos+' tramos de '+clp(d.tramo)+' × x'+d.m+(d.m2>d.m?' (pasas a x'+d.m2+' en el camino)':'')+'. Retorno de '+(d.pts/d.monto*100).toLocaleString('es-CL',{maximumFractionDigits:2})+'% en pesos al canjear. Compara con la app oficial para ver cuál de los dos calza. Solo para compras pagadas con la CMR.';
+    }else{
+      $('conv').innerHTML='<div class="stat"><span class="eyebrow">Por tramo cerrado</span><span class="v">—</span></div><div class="stat"><span class="eyebrow">Exacto</span><span class="v">—</span></div>';
+      $('convNote').textContent='Escribe el monto y mira cómo se mueven tus totales y los hitos.';
+    }
+    $('otroWarn').hidden=!(d.active&&d.otro);
+    $('otroWarn').textContent='Esta fecha es de otro año. Se guarda en el registro, pero no suma a tus puntos de '+YEAR+'.';
+    $('reg').disabled=!d.active||ny;
+    if(ny)$('convNote').textContent='Cierra '+S.year+' arriba antes de registrar compras de '+YEAR+'.';
+
+    /* Hitos: tarjetas de arriba, se actualizan con cada monto que escribes */
+    function why(h){
+      if(acc>h.val)return 'Meta cumplida';
+      if(h.k==='x4'&&S.mult>=4)return 'Ya lo tienes';
+      if(h.k==='x5'&&S.mult>=5)return 'Ya lo tienes';
+      if(h.spend&&gy!=null&&gy>h.spend)return 'Meta cumplida por gasto';
+      return '';
+    }
+    var nxt=H.find(function(h){return !why(h);});
+    var PART={a50:'part-a50',a100:'hc-a100',x4:'part-x4',x5:'part-x5'};
+    var byK={};H.forEach(function(h){byK[h.k]=h;});
+    H.forEach(function(h){
+      var k=h.k,w=why(h);
+      $(PART[k]).classList.toggle('ok',!!w);
+      if(w){
+        $('hb-'+k).innerHTML='<span class="pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>'+w+'</span>';
+        var cy=S.carry,fromCarry=cy&&cy.mult>=(k==='x5'?5:4)&&cy.multHasta&&cy.multHasta>=today()&&String(cy.year)!==S.year;
+        $('hs-'+k).textContent=(w==='Ya lo tienes')?(fromCarry?'Ganado en '+cy.year+(k==='x5'?' · duración por confirmar':' · hasta '+dmy(cy.multHasta)):'Lo marcaste en Configurar'):(k==='x5')?'Duración por confirmar con Falabella':'Vigente hasta el 31 de diciembre de '+(Number(S.year)+1);
+        $('hbar-'+k).hidden=true;$('hg-'+k).innerHTML='';
+      }else{
+        var need=h.val+1-acc;
+        var gG=gastoPara(acc,h.val+1,S.set.tramoG), gO=gastoPara(acc,h.val+1,S.set.tramoO);
+        var pct=Math.max(0,Math.min(100,acc/h.val*100));
+        $('hb-'+k).textContent=fmt(need);
+        $('hs-'+k).textContent='pts faltan · corte sobre '+fmt(h.val);
+        $('hbar-'+k).hidden=false;$('hp-'+k).style.width=pct+'%';
+        var by=(h.spend&&gy!=null)?'<div><span>Por gasto CMR</span><b>'+clp(Math.max(0,h.spend-gy)+1)+'</b></div>':'';
+        $('hg-'+k).innerHTML='<div><span>Grupo Falabella</span><b>'+clp(gG)+'</b></div><div><span>Otros comercios</span><b>'+clp(gO)+'</b></div>'+by;
+      }
+    });
+    /* En cada tarjeta doble, la meta en curso va arriba y la cumplida abajo; con las dos cumplidas, toda la tarjeta en verde */
+    [['a50','a100','hc-a50'],['x4','x5','hc-x4']].forEach(function(pr){
+      var d1=!!why(byK[pr[0]]),d2=!!why(byK[pr[1]]);
+      $(PART[pr[0]]).classList.toggle('low',d1);
+      $(PART[pr[1]]).classList.toggle('low',!d1);
+      var card=$(pr[2]);
+      card.classList.toggle('ok',d1&&d2);
+      card.classList.toggle('next',!!nxt&&(nxt.k===pr[0]||nxt.k===pr[1]));
+    });
+    $('xInfo').textContent='El x4 se activa sobre '+fmt(S.set.h180)+' puntos y rige hasta fin del año siguiente. El x5, sobre '+fmt(S.set.h350)+', rige en el mismo periodo al cumplirse la meta.';
+    var NOM={a50:'el 50% de descuento en administración',x4:'el x4',a100:'la administración gratis',x5:'el x5'};
+    $('ptsInfo').textContent=nxt?'Tu próximo objetivo es '+NOM[nxt.k]+': te faltan '+fmt(nxt.val+1-acc)+' puntos.':'Ya cumpliste todos los objetivos de este año.';
+    $('hitsNote').textContent=(nxt?'El borde marca tu próximo objetivo. ':'No queda ningún corte por alcanzar este año. ')+
+      'El gasto incluye el paso a x4 y x5 en el camino.'+(counts?' Incluye la compra que estás escribiendo, aún sin registrar.':'');
+
+    /* Nuevo año, beneficios e historial */
+    var accNow=(S.acc||0)+pp;
+    $('newYear').hidden=!ny;
+    if(ny){
+      $('nyTitle').textContent='Empezó '+YEAR;
+      $('nyText').textContent='Voy a cerrar '+S.year+' con '+fmt(accNow)+' Fpuntos y guardarlo en "Años cerrados". Tus compras pasan al historial y tu acumulado de '+YEAR+' queda en 0, para que pongas el número de la app en Configurar. Los beneficios que ganaste quedan en "Beneficios vigentes". Tu saldo se mantiene.';
+      $('nyBtn').textContent='Cerrar '+S.year+' y empezar '+YEAR;
+    }
+    $('benef').innerHTML=benefits(acc,gy).map(function(b){
+      return '<li class="row"><b>'+b.t+'</b><span class="t">'+b.s+'</span><span class="r"><span class="pill">'+b.h+'</span></span></li>';
+    }).join('');
+    $('histBox').hidden=!S.hist.length;
+    $('hist').innerHTML=S.hist.map(function(h){
+      return '<li class="row"><b>'+h.year+'</b><span class="t">'+fmt(h.acc)+' Fpuntos · x'+h.mult+(h.earned>h.mult?', ganaste x'+h.earned:'')+'</span>'+
+        '<span class="r">'+(h.disc===100?'Adm. $0':h.disc===50?'Adm. 50%':'Sin descuento')+'<small>'+h.compras+' compras</small></span></li>';
+    }).join('');
+
+    /* Compras registradas */
+    var cs=S.compras.slice().sort(function(a,b){return a.fecha<b.fecha?1:a.fecha>b.fecha?-1:b.id-a.id;});
+    var ch='';
+    cs.forEach(function(c){
+      var f=c.fecha.split('-').reverse().join('-');
+      var est=c.otro?'Otro año, no suma':(c.ab?'Abonada':'Por abonar');
+      var btn=c.otro?'':'<button type="button" class="mini" data-act="ab" data-id="'+c.id+'">'+(c.ab?'Marcar por abonar':'Marcar abonada')+'</button>';
+      ch+='<li class="row"><b>'+f+'</b><span class="t">'+(c.donde==='g'?'Grupo':'Otros')+' · '+clp(c.monto)+' · x'+c.m+(c.m2>c.m?'→x'+c.m2:'')+'</span>'+
+        '<span class="r">'+fmt(c.pts)+' pts<small>'+est+'</small></span>'+
+        '<span class="acts">'+btn+'<button type="button" class="mini" data-act="del" data-id="'+c.id+'">Borrar</button></span></li>';
+    });
+    $('compras').innerHTML=ch||'<li class="note">Aún no registras compras.</li>';
+    save();
+  }
+
+  /* Pone los puntos de miles mientras escribes y deja el cursor donde estaba */
+  function liveFmt(el){
+    var v=el.value,pos=el.selectionStart==null?v.length:el.selectionStart;
+    var before=v.slice(0,pos).replace(/\D/g,'').length;
+    var d=v.replace(/\D/g,'').slice(0,12);
+    el.value=d===''?'':fmt(parseInt(d,10));
+    var n=0,i=0;
+    if(before>0){for(;i<el.value.length;i++){if(/\d/.test(el.value[i]))n++;if(n===before){i++;break;}}}
+    try{el.setSelectionRange(i,i);}catch(e){}
+  }
+  function bind(id,key){
+    var el=$(id);
+    el.addEventListener('input',function(){liveFmt(el);S[key]=num(el.value);render();});
+    el.addEventListener('blur',function(){if(S[key]!=null)el.value=fmt(S[key]);});
+    if(S[key]!=null)el.value=fmt(S[key]);
+  }
+  bind('acc','acc');
+  bind('saldo','saldo');
+  bind('gasto','gasto');
+  bind('monto','monto');
+  $('fecha').value=today();
+  $('fecha').addEventListener('input',render);
+  $('fecha').addEventListener('change',render);
+
+  $('venceMes').value=String(S.vence.mes||1);
+  $('venceAnio').value=S.vence.anio||'';
+  $('venceMes').addEventListener('change',function(){S.vence.mes=+this.value;render();});
+  $('venceAnio').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'').slice(0,4);S.vence.anio=this.value?+this.value:null;render();});
+  $('nyBtn').addEventListener('click',function(){
+    closeYear();
+    $('acc').value=fmt(S.acc||0);
+    $('saldo').value=S.saldo!=null?fmt(S.saldo):'';
+    $('gasto').value='';
+    render();
+  });
+  /* Pantalla completa: se pide en el primer toque (los navegadores no la dejan activar solos). Si no se puede, la app sigue normal. */
+  (function(){
+    var el=document.documentElement,btn=$('fsBtn');
+    var can=!!(el.requestFullscreen||el.webkitRequestFullscreen);
+    function cur(){return document.fullscreenElement||document.webkitFullscreenElement;}
+    function ask(){
+      try{var p=(el.requestFullscreen||el.webkitRequestFullscreen).call(el);if(p&&p.catch)p.catch(function(){});}catch(e){}
+    }
+    function label(){var t=cur()?'Salir de pantalla completa':'Pantalla completa';btn.setAttribute('aria-label',t);btn.title=t;}
+    if(!can)return;
+    btn.hidden=false;
+    document.addEventListener('fullscreenchange',label);
+    document.addEventListener('webkitfullscreenchange',label);
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      if(cur()){try{(document.exitFullscreen||document.webkitExitFullscreen).call(document);}catch(x){}}else ask();
+    });
+    function first(e){
+      document.removeEventListener('pointerup',first,true);
+      if(btn.contains(e.target)||cur())return;
+      ask();
+    }
+    document.addEventListener('pointerup',first,true);
+  })();
+  $('cfgBtn').addEventListener('click',function(){
+    var open=$('cfg').hidden;
+    $('cfg').hidden=!open;
+    $('cfgBtn').setAttribute('aria-expanded',String(open));
+    var t=open?'Cerrar configuración':'Configurar';$('cfgBtn').setAttribute('aria-label',t);$('cfgBtn').title=t;$('cfgBtn').setAttribute('aria-pressed',String(open));
+  });
+  document.querySelectorAll('#multSeg button').forEach(function(b){b.addEventListener('click',function(){S.mult=+b.dataset.m;render();});});
+  document.querySelectorAll('#dondeSeg button').forEach(function(b){b.addEventListener('click',function(){S.donde=b.dataset.d;render();});});
+
+  $('reg').addEventListener('click',function(){
+    var d=draft();
+    if(!d.active||S.year!==YEAR)return;
+    S.compras.push({id:Date.now(),fecha:d.fecha,monto:d.monto,donde:S.donde,m:d.m,m2:d.m2,pts:d.pts,ab:false,otro:d.otro});
+    S.monto=null;$('monto').value='';$('fecha').value=today();
+    render();
+  });
+  $('compras').addEventListener('click',function(ev){
+    var b=ev.target.closest('button[data-act]');
+    if(!b)return;
+    var id=+b.dataset.id;
+    if(b.dataset.act==='del'){askDel(id,b);return;}
+    S.compras.forEach(function(c){if(c.id===id)c.ab=!c.ab;});
+    render();
+  });
+  /* Ventana de confirmación para borrar una compra */
+  var dlgFrom=null;
+  function closeDlg(){$('dlg').hidden=true;document.removeEventListener('keydown',dlgKey);if(dlgFrom&&document.body.contains(dlgFrom))try{dlgFrom.focus();}catch(e){}dlgFrom=null;}
+  function dlgKey(e){if(e.key==='Escape')closeDlg();}
+  function askDel(id,from){
+    var c=S.compras.filter(function(x){return x.id===id;})[0];
+    if(!c)return;
+    dlgFrom=from;
+    $('dlgD').textContent='Compra del '+String(c.fecha).split('-').reverse().join('-')+' por '+clp(c.monto)+' ('+fmt(c.pts)+' puntos). Si la borras, deja de sumar a tus totales.';
+    $('dlgYes').onclick=function(){S.compras=S.compras.filter(function(x){return x.id!==id;});closeDlg();render();};
+    $('dlg').hidden=false;
+    document.addEventListener('keydown',dlgKey);
+    $('dlgNo').focus();
+  }
+  $('dlgNo').addEventListener('click',closeDlg);
+  $('dlg').addEventListener('click',function(e){if(e.target===$('dlg'))closeDlg();});
+
+  var fields=[
+    ['tramoG','Pesos por tramo, grupo'],['tramoO','Pesos por tramo, otros'],
+    ['h80','Corte del 50%, en Fpuntos'],['h180','Corte del x4, en Fpuntos'],
+    ['h220','Corte de $0, en Fpuntos'],['h350','Corte del x5, en Fpuntos'],
+    ['g50','Gasto del 50%, en pesos'],['g100','Gasto de $0, en pesos']
+  ];
+  $('settings').innerHTML=fields.map(function(f){
+    var inp='<input id="s_'+f[0]+'" type="text" inputmode="numeric" autocomplete="off">';
+    if(/^(tramo|g)/.test(f[0]))inp='<div class="money"><span aria-hidden="true">$</span>'+inp+'</div>';
+    return '<div class="field"><label for="s_'+f[0]+'">'+f[1]+'</label>'+inp+'</div>';
+  }).join('');
+  function fillSettings(){fields.forEach(function(f){$('s_'+f[0]).value=fmt(S.set[f[0]]);});}
+  fields.forEach(function(f){
+    var el=$('s_'+f[0]);
+    el.addEventListener('input',function(){liveFmt(el);var v=num(el.value);if(v&&v>0){S.set[f[0]]=v;render();}});
+    el.addEventListener('blur',function(){el.value=fmt(S.set[f[0]]);});
+  });
+  fillSettings();
+  $('reset').addEventListener('click',function(){S.set=Object.assign({},DEF);fillSettings();render();});
+
+  /* ---------- Tema, modo edición, orden y textos ----------
+     S.theme  'light' | 'dark' | null (null = el del aparato)
+     S.tx     {idDelTexto: texto propio}; los textos por defecto están en el HTML (data-tx)
+     S.order  {blocks:[claves], cards:[claves]}; las claves son los data-key del HTML
+     S.sizes  {claveDeTarjeta: 1|2|3}; 1 = chica, 2 = mediana (2 columnas), 3 = ancha (toda la fila) */
+  var ICON={
+    sun:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"/></svg>',
+    moon:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/></svg>',
+    grip:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
+    up:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6 -6l6 6"/></svg>',
+    down:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg>',
+    left:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6l6 6"/></svg>',
+    right:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6l-6 6"/></svg>'
+  };
+  var mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
+  function isDark(){return S.theme==='dark'?true:S.theme==='light'?false:!!(mq&&mq.matches);}
+  function applyTheme(){
+    if(S.theme)document.documentElement.setAttribute('data-theme',S.theme);else document.documentElement.removeAttribute('data-theme');
+    var d=isDark(),b=$('themeBtn');
+    b.innerHTML=d?ICON.sun:ICON.moon;
+    var t=d?'Cambiar a modo claro':'Cambiar a modo oscuro';
+    b.setAttribute('aria-label',t);b.title=t;
+  }
+  $('themeBtn').addEventListener('click',function(){S.theme=isDark()?'light':'dark';applyTheme();save();});
+  if(mq&&mq.addEventListener)mq.addEventListener('change',function(){if(!S.theme)applyTheme();});
+  applyTheme();
+
+  /* Textos editables */
+  /* El año del encabezado se pone solo; solo "Tarjeta CMR Elite" es editable */
+  $('yearTag').textContent=YEAR;
+  if(S.tx.eyebrow)S.tx.eyebrow=S.tx.eyebrow.replace(/\s*·\s*\d{4}\s*$/,'');
+  var txEls=[].slice.call(document.querySelectorAll('[data-tx]'));
+  var DEFTX={};
+  txEls.forEach(function(el){
+    DEFTX[el.dataset.tx]=el.textContent;
+    if(S.tx[el.dataset.tx])el.textContent=S.tx[el.dataset.tx];
+    el.addEventListener('input',function(){
+      var v=el.textContent.replace(/\s+/g,' ').trim();
+      if(v&&v!==DEFTX[el.dataset.tx])S.tx[el.dataset.tx]=v;else delete S.tx[el.dataset.tx];
+      save();
+    });
+    el.addEventListener('blur',function(){
+      if(!el.textContent.trim())el.textContent=DEFTX[el.dataset.tx];
+      else if(S.tx[el.dataset.tx])el.textContent=S.tx[el.dataset.tx];
+    });
+    el.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();el.blur();}});
+    el.addEventListener('paste',function(e){
+      e.preventDefault();
+      var t=((e.clipboardData||window.clipboardData).getData('text')||'').replace(/\s+/g,' ');
+      document.execCommand('insertText',false,t);
+    });
+  });
+  $('rstTx').addEventListener('click',function(){
+    S.tx={};txEls.forEach(function(el){el.textContent=DEFTX[el.dataset.tx];});save();
+  });
+
+  /* Orden */
+  var blocksEl=$('blocks'),cardsEl=$('cards');
+  function keysOf(c){return [].map.call(c.children,function(x){return x.dataset.key;});}
+  var DEFORD={blocks:keysOf(blocksEl),cards:keysOf(cardsEl)};
+  function applyOrder(c,keys){
+    if(!Array.isArray(keys))return;
+    keys.forEach(function(k){
+      var el=[].filter.call(c.children,function(x){return x.dataset.key===k;})[0];
+      if(el)c.appendChild(el);
+    });
+  }
+  if(S.order){
+    if(Array.isArray(S.order.cards)&&S.order.cards.indexOf('reg')<0){var ix=S.order.cards.indexOf('saldo');S.order.cards.splice(ix<0?0:ix+1,0,'reg');}
+    applyOrder(blocksEl,S.order.blocks);applyOrder(cardsEl,S.order.cards);
+  }
+  function saveOrder(){S.order={blocks:keysOf(blocksEl),cards:keysOf(cardsEl)};save();}
+  var SZNAME=['chica','mediana','ancha'],DEFSZ={reg:3,acc:3};
+  function sizeIcon(n){return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="10" rx="2"/><rect x="4" y="9" width="'+[5,10,16][n-1]+'" height="6" rx="1" fill="currentColor" stroke="none"/></svg>';}
+  function applySize(el){
+    var n=S.sizes[el.dataset.key]||DEFSZ[el.dataset.key]||1;
+    el.classList.remove('sz2','sz3');
+    if(n>1)el.classList.add('sz'+n);
+    var b=el.querySelector('.szb');
+    if(b){b.innerHTML=sizeIcon(n);var t='Tamaño: '+SZNAME[n-1]+'. Toca para cambiar';b.title=t;b.setAttribute('aria-label',t);}
+  }
+  $('rstOrder').addEventListener('click',function(){
+    applyOrder(blocksEl,DEFORD.blocks);applyOrder(cardsEl,DEFORD.cards);S.order=null;S.sizes={};
+    [].forEach.call(cardsEl.children,applySize);save();
+  });
+
+  function mover(item,cont,grid){
+    var bar=document.createElement('div');bar.className='mv';
+    var nm=(item.querySelector('[data-tx]')||{}).textContent||'';
+    bar.innerHTML='<button type="button" class="grip" aria-label="Arrastrar para mover">'+ICON.grip+'</button>'+
+      '<button type="button" data-d="-1" aria-label="Mover antes">'+(grid?ICON.left:ICON.up)+'</button>'+
+      '<button type="button" data-d="1" aria-label="Mover después">'+(grid?ICON.right:ICON.down)+'</button>'+(grid?'<button type="button" class="szb"></button>':'');
+    item.insertBefore(bar,item.firstChild);
+    bar.addEventListener('click',function(e){
+      var sz=e.target.closest('.szb');
+      if(sz){S.sizes[item.dataset.key]=((S.sizes[item.dataset.key]||DEFSZ[item.dataset.key]||1)%3)+1;applySize(item);save();return;}
+      var b=e.target.closest('button[data-d]');if(!b)return;
+      var d=+b.dataset.d,sib=d<0?item.previousElementSibling:item.nextElementSibling;
+      if(!sib)return;
+      if(d<0)cont.insertBefore(item,sib);else cont.insertBefore(sib,item);
+      saveOrder();
+      try{item.scrollIntoView({block:'nearest',behavior:'smooth'});}catch(x){}
+    });
+    var grip=bar.querySelector('.grip'),target=null,after=false;
+    function clear(){[].forEach.call(cont.children,function(c){c.classList.remove('db','da');});}
+    grip.addEventListener('pointerdown',function(e){
+      e.preventDefault();
+      try{grip.setPointerCapture(e.pointerId);}catch(x){}
+      item.classList.add('dragging');target=null;
+    });
+    grip.addEventListener('pointermove',function(e){
+      if(!item.classList.contains('dragging'))return;
+      if(e.clientY<70)window.scrollBy(0,-16);else if(e.clientY>window.innerHeight-70)window.scrollBy(0,16);
+      var els=document.elementsFromPoint(e.clientX,e.clientY),over=null;
+      for(var i=0;i<els.length&&!over;i++){
+        var c=els[i];
+        while(c&&c.parentNode!==cont)c=c.parentNode;
+        if(c&&c!==item)over=c;
+      }
+      if(!over)return;
+      var r=over.getBoundingClientRect();
+      after=grid?e.clientX>r.left+r.width/2:e.clientY>r.top+r.height/2;
+      clear();target=over;over.classList.add(after?'da':'db');
+    });
+    function end(){
+      if(!item.classList.contains('dragging'))return;
+      item.classList.remove('dragging');clear();
+      if(target){cont.insertBefore(item,after?target.nextSibling:target);saveOrder();}
+      target=null;
+    }
+    grip.addEventListener('pointerup',end);
+    grip.addEventListener('pointercancel',function(){item.classList.remove('dragging');clear();target=null;});
+  }
+  [].forEach.call(blocksEl.children,function(x){mover(x,blocksEl,false);});
+  [].forEach.call(cardsEl.children,function(x){mover(x,cardsEl,true);applySize(x);});
+
+  /* Modo edición */
+  var editing=false;
+  $('editBtn').addEventListener('click',function(){
+    editing=!editing;
+    document.body.classList.toggle('editing',editing);
+    $('editBtn').setAttribute('aria-pressed',String(editing));
+    $('editBtn').title=editing?'Terminar de editar':'Editar';
+    $('editBtn').setAttribute('aria-label',editing?'Terminar de editar':'Editar');
+    $('editBar').hidden=!editing;
+    txEls.forEach(function(el){
+      if(editing){el.setAttribute('contenteditable','plaintext-only');if(el.contentEditable!=='plaintext-only')el.setAttribute('contenteditable','true');el.setAttribute('spellcheck','false');}
+      else el.removeAttribute('contenteditable');
+    });
+  });
+
+  render();
+  startSync();
+})();
+</script>
+
+</html>
