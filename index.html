@@ -83,8 +83,16 @@ input[type=text]:focus-visible,input[type=date]:focus-visible,button:focus-visib
 @container (min-width:520px){.falg{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .ft{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;grid-template-rows:1fr auto;gap:4px;min-width:0}
 .ft .fl{font:600 13px var(--f-body);color:var(--accent)}
-.ft .fn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;font:700 clamp(22px,6vw,30px)/1.05 var(--f-display);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--fg)}
-.ft .fn small{font:600 13px var(--f-body);letter-spacing:0;text-transform:none;color:var(--muted)}
+.ft .fn{display:flex;align-items:baseline;gap:4px;font:700 clamp(18px,5.2vw,24px)/1.05 var(--f-display);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--fg)}
+.ft .fn small{font:600 12px var(--f-body);letter-spacing:0;text-transform:none;color:var(--muted)}
+.ft .fc{font:700 clamp(14px,3.8vw,17px)/1.1 var(--f-display);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--fg)}
+.ft .fc small{display:block;font:600 11px var(--f-body);color:var(--muted);margin-bottom:1px}
+.ft .fb{display:grid;gap:3px;align-self:end}
+.mishead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.mishead .eyebrow{margin:0}
+.vseg{width:auto}
+.vseg button{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;min-height:38px}
+.vseg svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .ft.ok{background:var(--accent-soft);border-color:transparent}
 .ft.ok .pill{background:var(--surface);display:inline-flex;align-items:center;gap:5px;width:fit-content;max-width:100%;white-space:normal}
 #nAcc{color:var(--pts-blue)}
@@ -298,7 +306,7 @@ details{display:grid;gap:12px}
   <div class="blocks list-mode" id="blocks">
     <section class="card panel" id="blk-cards" data-key="cards" aria-live="polite" aria-label="Mis Fpuntos">
       <div class="sect">
-        <p class="eyebrow" id="misTitle"><span data-tx="t-mis">Mis Fpuntos (1 Fpunto = $1)</span> <span class="tag" id="prov" hidden>con compra sin registrar</span></p>
+        <div class="mishead"><p class="eyebrow" id="misTitle"><span data-tx="t-mis">Mis Fpuntos (1 Fpunto = $1)</span> <span class="tag" id="prov" hidden>con compra sin registrar</span></p><div class="seg vseg" id="vseg" role="group" aria-label="Ver costo en"><button type="button" data-v="g" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-2v18M12 9h8v12M7 9h2M7 13h2M7 17h2M15 13h2M15 17h2"/></svg>Falabella</button><button type="button" data-v="o" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/></svg>Otros</button></div></div>
         <div class="nums" id="cards">
           <div class="n pts" id="c-acc" data-key="acc"><div class="pbox"><div class="ppart"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><hr class="hdiv"><div class="ppart"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div></div><div class="fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span><div class="falg" id="falg"></div></div><div class="gbox"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div><div class="gtxt"><span class="wpill" id="ptsInfo"></span></div></div>
           <div class="n regc" id="c-reg" data-key="reg" aria-label="Registrar una compra">
@@ -374,7 +382,7 @@ details{display:grid;gap:12px}
      Sin confirmar: duración del x5, si el contador vuelve a 0 el 1 de enero, cómo se renueva el x4 el tercer año. */
   var DEF={tramoG:150,tramoO:300,h80:80000,h180:180000,h220:220000,h350:350000,g50:6600000,g100:18000000};
   var KEY='fpuntos-calc-v2';
-  var S={acc:115874,saldo:75626,gasto:null,mult:3,donde:'g',compras:[],year:null,hist:[],carry:null,theme:null,tx:{},order:null,sizes:{},vence:{mes:3,anio:2028},set:Object.assign({},DEF)};
+  var S={acc:115874,saldo:75626,gasto:null,mult:3,donde:'g',vista:'g',compras:[],year:null,hist:[],carry:null,theme:null,tx:{},order:null,sizes:{},vence:{mes:3,anio:2028},set:Object.assign({},DEF)};
   try{
     var raw=localStorage.getItem(KEY);
     if(raw){var o=JSON.parse(raw);S=Object.assign(S,o);S.set=Object.assign({},DEF,o.set||{});}
@@ -680,8 +688,10 @@ details{display:grid;gap:12px}
     var FAL=[['a50','50% de descuento'],['a100','100% de descuento'],['x4','Multiplicador por 4'],['x5','Multiplicador por 5']];
     $('falg').innerHTML=FAL.map(function(f){
       var h=byK[f[0]],w=why(h);
-      return '<div class="ft'+(w?' ok':'')+'"><span class="fl">'+f[1]+'</span>'+(w?'<span class="pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>'+w+'</span>':'<span class="fn">'+fmt(h.val+1-acc)+'<small>Pts</small></span>')+'</div>';
+      var costo=w?'':clp(gastoPara(acc,h.val+1,S.vista==='o'?S.set.tramoO:S.set.tramoG));
+      return '<div class="ft'+(w?' ok':'')+'"><span class="fl">'+f[1]+'</span>'+(w?'<span class="pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>'+w+'</span>':'<div class="fb"><span class="fn">'+fmt(h.val+1-acc)+'<small>Pts</small></span><span class="fc"><small>Por gastar</small>'+costo+'</span></div>')+'</div>';
     }).join('');
+    [].forEach.call(document.querySelectorAll('#vseg button'),function(b){b.setAttribute('aria-pressed',String(b.dataset.v===(S.vista==='o'?'o':'g')));});
     /* En cada tarjeta doble, la meta en curso va arriba y la cumplida abajo; con las dos cumplidas, toda la tarjeta en verde */
     [['a50','a100','hc-a50'],['x4','x5','hc-x4']].forEach(function(pr){
       var d1=!!why(byK[pr[0]]),d2=!!why(byK[pr[1]]);
@@ -804,6 +814,7 @@ details{display:grid;gap:12px}
     S.monto=null;$('monto').value='';$('fecha').value=today();
     render();
   });
+  [].forEach.call(document.querySelectorAll('#vseg button'),function(b){b.addEventListener('click',function(){S.vista=b.dataset.v;render();});});
   $('compras').addEventListener('click',function(ev){
     var b=ev.target.closest('button[data-act]');
     if(!b)return;
