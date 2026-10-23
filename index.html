@@ -84,7 +84,7 @@ input[type=text]:focus-visible,input[type=date]:focus-visible,button:focus-visib
 .ft{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;grid-template-rows:1fr auto;gap:4px;min-width:0}
 .ft .fl{font:600 13px var(--f-body);color:var(--accent)}
 .ft .fn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;font:700 clamp(22px,6vw,30px)/1.05 var(--f-display);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--fg)}
-.ft .fn small{font:600 12px var(--f-body);letter-spacing:.06em;color:var(--muted)}
+.ft .fn small{font:600 13px var(--f-body);letter-spacing:0;text-transform:none;color:var(--muted)}
 .ft.ok{background:var(--accent-soft);border-color:transparent}
 .ft.ok .pill{background:var(--surface);display:inline-flex;align-items:center;gap:5px;width:fit-content;max-width:100%;white-space:normal}
 #nAcc{color:var(--pts-blue)}
@@ -680,7 +680,7 @@ details{display:grid;gap:12px}
     var FAL=[['a50','50% de descuento'],['a100','100% de descuento'],['x4','Multiplicador por 4'],['x5','Multiplicador por 5']];
     $('falg').innerHTML=FAL.map(function(f){
       var h=byK[f[0]],w=why(h);
-      return '<div class="ft'+(w?' ok':'')+'"><span class="fl">'+f[1]+'</span>'+(w?'<span class="pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>'+w+'</span>':'<span class="fn">'+fmt(h.val+1-acc)+'<small>PTS</small></span>')+'</div>';
+      return '<div class="ft'+(w?' ok':'')+'"><span class="fl">'+f[1]+'</span>'+(w?'<span class="pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>'+w+'</span>':'<span class="fn">'+fmt(h.val+1-acc)+'<small>Pts</small></span>')+'</div>';
     }).join('');
     /* En cada tarjeta doble, la meta en curso va arriba y la cumplida abajo; con las dos cumplidas, toda la tarjeta en verde */
     [['a50','a100','hc-a50'],['x4','x5','hc-x4']].forEach(function(pr){
