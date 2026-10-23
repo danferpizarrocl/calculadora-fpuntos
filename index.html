@@ -75,8 +75,8 @@ input[type=text]:focus-visible,input[type=date]:focus-visible,button:focus-visib
 /* Panel principal */
 .panel{background:var(--accent-soft);border-color:transparent;gap:18px}
 .panel .eyebrow{color:var(--accent)}
-.ppart:first-child{grid-template-rows:auto minmax(0,1fr)}
-.fitbox{position:relative;min-width:0;min-height:clamp(56px,15vw,80px)}
+.ppart{grid-template-rows:auto minmax(0,1fr)}
+.fitbox{position:relative;min-width:0;min-height:clamp(72px,19vw,92px)}
 .n .fitbox .big{position:absolute;left:0;top:50%;transform:translateY(-50%);width:max-content;line-height:1}
 #nAcc{color:var(--pts-blue)}
 #nSaldo{color:var(--pts-red)}
@@ -142,7 +142,7 @@ select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @container (min-width:400px){
   .pbox{grid-template-columns:1fr 1fr;column-gap:16px}
   .pbox>.hdiv{display:none}
-  .pbox>.ppart+.ppart{border-left:1px solid var(--line);padding-left:16px}
+  .pbox>.hdiv+.ppart{border-left:1px solid var(--line);padding-left:16px}
 }
 .n .calc,.hc .calc,.panel .note{font-style:italic}
 .hdiv{order:1;border:0;border-top:1px solid var(--line);margin:8px 0;width:100%}
@@ -291,7 +291,7 @@ details{display:grid;gap:12px}
       <div class="sect">
         <p class="eyebrow" id="misTitle"><span data-tx="t-mis">Mis Fpuntos (1 Fpunto = $1)</span> <span class="tag" id="prov" hidden>con compra sin registrar</span></p>
         <div class="nums" id="cards">
-          <div class="n pts" id="c-acc" data-key="acc"><div class="pbox"><div class="ppart"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><hr class="hdiv"><div class="ppart"><span class="eyebrow" data-tx="t-saldo">Saldo disponible</span><span class="big" id="nSaldo"></span><div class="gbox"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div></div></div><div class="gtxt"><span class="wpill" id="ptsInfo"></span></div></div>
+          <div class="n pts" id="c-acc" data-key="acc"><div class="pbox"><div class="ppart"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><hr class="hdiv"><div class="ppart"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div></div><div class="gbox"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div><div class="gtxt"><span class="wpill" id="ptsInfo"></span></div></div>
           <div class="n regc" id="c-reg" data-key="reg" aria-label="Registrar una compra">
       <h3 data-tx="t-reg">Registrar una compra</h3>
       <div class="seg" role="group" aria-label="Dónde fue la compra" id="dondeSeg">
@@ -453,13 +453,20 @@ details{display:grid;gap:12px}
 
   /* El número de "Puntos del año" se agranda para llenar su espacio y se reacomoda solo cuando cambia la cifra o el tamaño de la pantalla */
   function fitAcc(){
-    var el=$('nAcc'),box=$('nAccBox');if(!el||!box)return;
-    var w=box.clientWidth,h=box.clientHeight;if(!w||!h)return;
-    el.style.fontSize='100px';
-    var tw=el.offsetWidth;if(!tw)return;
-    el.style.fontSize=Math.max(20,Math.floor(Math.min(100*w/tw*0.98,h*0.92,220)))+'px';
+    var pairs=[['nAcc','nAccBox'],['nSaldo','nSaldoBox']],best=null;
+    pairs.forEach(function(p){
+      var el=$(p[0]),box=$(p[1]);if(!el||!box)return;
+      var w=box.clientWidth,h=box.clientHeight;if(!w||!h)return;
+      el.style.fontSize='100px';
+      var tw=el.offsetWidth;if(!tw)return;
+      var f=Math.min(100*w/tw*0.98,h*0.92,220);
+      best=best==null?f:Math.min(best,f);
+    });
+    if(best==null)return;
+    var px=Math.max(20,Math.floor(best))+'px';
+    pairs.forEach(function(p){var el=$(p[0]);if(el)el.style.fontSize=px;});
   }
-  if(window.ResizeObserver){try{new ResizeObserver(function(){fitAcc();}).observe($('nAccBox'));}catch(e){}}
+  if(window.ResizeObserver){try{var ro=new ResizeObserver(function(){fitAcc();});ro.observe($('nAccBox'));ro.observe($('nSaldoBox'));}catch(e){}}
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitAcc);
   window.addEventListener('resize',fitAcc);
 
@@ -594,6 +601,7 @@ details{display:grid;gap:12px}
     var sBase=(S.saldo==null&&!np)?null:(S.saldo||0)+pp;
     var sTot=(sBase==null&&!counts)?null:(sBase||0)+(counts?d.pts:0);
     $('nSaldo').textContent=sTot==null?'—':fmt(sTot);
+    fitAcc();
     $('nSaldoCalc').textContent=sTot==null?'Agrégalo en Configurar':('Al canjear, tu saldo disponible equivale a '+clp(sTot)+'.');
 
     /* Vencimiento de parte del saldo */
