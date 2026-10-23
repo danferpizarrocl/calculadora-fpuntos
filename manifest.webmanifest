@@ -5,7 +5,11 @@
   "description": "Calculadora de Fpuntos de la tarjeta CMR",
   "start_url": "/calculadora-fpuntos/",
   "scope": "/calculadora-fpuntos/",
-  "display": "standalone",
+  "display": "fullscreen",
+  "display_override": [
+    "fullscreen",
+    "standalone"
+  ],
   "orientation": "any",
   "lang": "es-CL",
   "background_color": "#0C1411",
@@ -24,7 +28,7 @@
       "purpose": "any"
     },
     {
-      "src": "icon-512.png",
+      "src": "icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
