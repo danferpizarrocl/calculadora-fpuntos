@@ -147,6 +147,7 @@ select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .n.pts{display:flex;flex-direction:column;gap:8px}
 .gtxt{margin-top:auto;background:var(--accent-soft);border-radius:10px;padding:8px;font:600 13px/1.5 var(--f-body);color:var(--accent);order:5;min-width:0}
 .hc>.gtxt{margin-top:auto}
+.n.pts>.gtxt{order:0;margin-top:0}
 .wpill{display:block;background:var(--surface);border-radius:12px;padding:6px 10px;font:600 12px/1.45 var(--f-body);color:var(--accent)}
 .hc>.pbox,.hc>.hpart{flex:none}
 .hpart{display:grid;gap:4px;order:0;min-width:0;grid-template-columns:minmax(0,1fr)}
@@ -311,7 +312,7 @@ details{display:grid;gap:12px}
       <div class="sect">
         <div class="mishead"><p class="eyebrow" id="misTitle"><span data-tx="t-mis">Mis Fpuntos (1 Fpunto = $1)</span> <span class="tag" id="prov" hidden>con compra sin registrar</span></p><div class="seg vseg" id="vseg" role="group" aria-label="Ver costo en"><button type="button" data-v="g" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-2v18M12 9h8v12M7 9h2M7 13h2M7 17h2M15 13h2M15 17h2"/></svg>Falabella</button><button type="button" data-v="o" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/></svg>Otros</button></div></div>
         <div class="nums" id="cards">
-          <div class="n pts" id="c-acc" data-key="acc"><div class="pbox"><div class="ppart"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><hr class="hdiv"><div class="ppart"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div></div><div class="fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span><div class="falg" id="falg"></div></div><div class="gbox"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div><div class="gtxt"><span class="wpill" id="ptsInfo"></span></div></div>
+          <div class="n pts" id="c-acc" data-key="acc"><div class="pbox"><div class="ppart"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><hr class="hdiv"><div class="ppart"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div></div><div class="fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span><div class="falg" id="falg"></div></div><div class="gtxt"><span class="wpill" id="ptsInfo"></span></div><div class="gbox"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div></div>
           <div class="n regc" id="c-reg" data-key="reg" aria-label="Registrar una compra">
       <h3 data-tx="t-reg">Registrar una compra</h3>
       <div class="seg" role="group" aria-label="Dónde fue la compra" id="dondeSeg">
