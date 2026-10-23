@@ -218,6 +218,8 @@ ul.hits{list-style:none;margin:0;padding:0;display:grid;gap:10px}
 
 /* Compras registradas */
 ul.hitos{list-style:none;margin:0;padding:0}
+ul.bul{margin:0;padding-left:20px;display:grid;gap:8px}
+ul.bul li::marker{color:var(--accent)}
 .row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:12px 0;border-top:1px solid var(--line)}
 .row:first-child{border-top:0;padding-top:0}
 .row b{font-family:var(--f-data);font-weight:500;font-size:16px;font-variant-numeric:tabular-nums}
@@ -225,6 +227,12 @@ ul.hitos{list-style:none;margin:0;padding:0}
 .row .r{grid-column:2;grid-row:1/span 2;text-align:right;font-variant-numeric:tabular-nums;font-family:var(--f-data);font-size:14px}
 .row .r small{display:block;font-family:var(--f-body)}
 .row .acts{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+button.mini.dng{border-color:var(--pts-red);color:var(--pts-red)}
+button.mini:disabled{opacity:.5;cursor:default}
+.ctools{display:flex;flex-wrap:wrap;gap:8px}
+.selc{width:22px;height:22px;margin:0 8px 0 0;vertical-align:middle;accent-color:var(--accent)}
+.selmode .row .acts{display:none}
+.row.picked{background:var(--accent-soft)}
 button.mini{font:600 13px var(--f-body);padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
 .hbtns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 button.ghost{font:600 14px var(--f-body);padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
@@ -337,11 +345,16 @@ details{display:grid;gap:12px}
     </div>
         </div>
         <div class="ladder" id="ladder"></div>
-        <p class="note" id="ladderNote"></p>
-        <div id="goalNotes"></div>
-        <p class="note" id="xInfoNote"></p>
-        <p class="note" id="hitsNote"></p>
-        <p class="note" id="startNote"></p>
+        <ul class="bul">
+          <li class="note" id="ladderNote"></li>
+          <li class="note" id="gn-a50"></li>
+          <li class="note" id="gn-a100"></li>
+          <li class="note" id="gn-x4"></li>
+          <li class="note" id="gn-x5"></li>
+          <li class="note" id="xInfoNote"></li>
+          <li class="note" id="hitsNote"></li>
+          <li class="note" id="startNote"></li>
+        </ul>
       </div>
     </section>
 
@@ -354,6 +367,12 @@ details{display:grid;gap:12px}
 
     <section class="card" id="blk-compras" data-key="compras" aria-label="Compras registradas">
       <h2 data-tx="t-compras">Compras registradas</h2>
+      <div class="ctools" id="ctools" hidden>
+        <button type="button" class="mini" id="cSel">Seleccionar</button>
+        <button type="button" class="mini" id="cAll" hidden>Seleccionar todas</button>
+        <button type="button" class="mini dng" id="cDelSel" hidden>Borrar seleccionadas</button>
+        <button type="button" class="mini dng" id="cDelAll">Borrar todas</button>
+      </div>
       <ul class="hitos" id="compras"></ul>
       <p class="note">Las compras por abonar suman a tus puntos, a tu saldo y a tu gasto del año. Cuando una aparezca en la app, actualiza arriba, en Configurar, tus puntos con el número oficial y márcala como abonada, así no se cuenta doble.</p>
     </section>
@@ -401,6 +420,7 @@ details{display:grid;gap:12px}
   S.monto=null;
   /* Sincronización entre dispositivos: la capacidad db de Claude guarda una copia privada del estado en tu cuenta (data/users/<id>/fpuntos).
      S._t = momento del último cambio real; gana la copia con _t más nuevo. Si db no está disponible, todo sigue en este dispositivo. */
+  var selMode=false,sel={};
   var sync={on:false,ready:false,doc:null,pushing:false,again:false,timer:null};
   function strip(j){var o=JSON.parse(j);delete o._t;delete o.monto;return JSON.stringify(o);}
   function snapJson(){var c=Object.assign({},S);delete c._t;delete c.monto;return JSON.stringify(c);}
@@ -670,7 +690,7 @@ details{display:grid;gap:12px}
     var byK={};H.forEach(function(h){byK[h.k]=h;});
     /* Notas de los objetivos, al final de la página: cambian solas con tus puntos, tu gasto y la fecha */
     var NN={a50:'50% de descuento en administración',a100:'100% de descuento: administración gratis',x4:'Multiplicador por 4',x5:'Multiplicador por 5'};
-    $('goalNotes').innerHTML=['a50','a100','x4','x5'].map(function(k){
+    ['a50','a100','x4','x5'].forEach(function(k){
       var h=byK[k],w=why(h),txt;
       if(w){
         var cy=S.carry,fromCarry=cy&&cy.mult>=(k==='x5'?5:4)&&cy.multHasta&&cy.multHasta>=today()&&String(cy.year)!==S.year;
@@ -682,8 +702,8 @@ details{display:grid;gap:12px}
         if(k==='x5')txt+='. Duración por confirmar con Falabella';
         txt+='.';
       }
-      return '<p class="note"><b>'+NN[k]+':</b> '+txt+'</p>';
-    }).join('');
+      $('gn-'+k).innerHTML='<b>'+NN[k]+':</b> '+txt;
+    });
     /* Puntos que faltan: sección de la tarjeta principal, se actualiza con cada monto */
     var FAL=[['a50','50% de descuento'],['a100','100% de descuento'],['x4','Multiplicador por 4'],['x5','Multiplicador por 5']];
     $('falg').innerHTML=FAL.map(function(f){
@@ -722,11 +742,20 @@ details{display:grid;gap:12px}
       var f=c.fecha.split('-').reverse().join('-');
       var est=c.otro?'Otro año, no suma':(c.ab?'Abonada':'Por abonar');
       var btn=c.otro?'':'<button type="button" class="mini" data-act="ab" data-id="'+c.id+'">'+(c.ab?'Marcar por abonar':'Marcar abonada')+'</button>';
-      ch+='<li class="row"><b>'+f+'</b><span class="t">'+(c.donde==='g'?'Grupo':'Otros')+' · '+clp(c.monto)+' · x'+c.m+(c.m2>c.m?'→x'+c.m2:'')+'</span>'+
+      ch+='<li class="row'+(selMode&&sel[c.id]?' picked':'')+'" data-id="'+c.id+'"><b>'+(selMode?'<input type="checkbox" class="selc" data-id="'+c.id+'"'+(sel[c.id]?' checked':'')+' aria-label="Seleccionar compra">':'')+f+'</b><span class="t">'+(c.donde==='g'?'Grupo':'Otros')+' · '+clp(c.monto)+' · x'+c.m+(c.m2>c.m?'→x'+c.m2:'')+'</span>'+
         '<span class="r">'+fmt(c.pts)+' pts<small>'+est+'</small></span>'+
         '<span class="acts">'+btn+'<button type="button" class="mini" data-act="del" data-id="'+c.id+'">Borrar</button></span></li>';
     });
     $('compras').innerHTML=ch||'<li class="note">Aún no registras compras.</li>';
+    Object.keys(sel).forEach(function(id){if(!S.compras.some(function(c){return String(c.id)===id;}))delete sel[id];});
+    if(!S.compras.length)selMode=false;
+    var nSel=Object.keys(sel).length;
+    $('ctools').hidden=!S.compras.length;
+    $('blk-compras').classList.toggle('selmode',selMode);
+    $('cSel').textContent=selMode?'Cancelar selección':'Seleccionar';
+    $('cAll').hidden=!selMode;$('cAll').textContent=(nSel===S.compras.length)?'Quitar selección':'Seleccionar todas';
+    $('cDelSel').hidden=!selMode;$('cDelSel').disabled=!nSel;$('cDelSel').textContent='Borrar seleccionadas ('+nSel+')';
+    $('cDelAll').hidden=selMode;
     save();
   }
 
@@ -807,6 +836,8 @@ details{display:grid;gap:12px}
   });
   [].forEach.call(document.querySelectorAll('#vseg button'),function(b){b.addEventListener('click',function(){S.vista=b.dataset.v;render();});});
   $('compras').addEventListener('click',function(ev){
+    var li=ev.target.closest('li.row');
+    if(selMode&&li&&!ev.target.closest('input.selc')){var k=li.dataset.id;if(sel[k])delete sel[k];else sel[k]=true;render();return;}
     var b=ev.target.closest('button[data-act]');
     if(!b)return;
     var id=+b.dataset.id;
@@ -818,16 +849,43 @@ details{display:grid;gap:12px}
   var dlgFrom=null;
   function closeDlg(){$('dlg').hidden=true;document.removeEventListener('keydown',dlgKey);if(dlgFrom&&document.body.contains(dlgFrom))try{dlgFrom.focus();}catch(e){}dlgFrom=null;}
   function dlgKey(e){if(e.key==='Escape')closeDlg();}
-  function askDel(id,from){
-    var c=S.compras.filter(function(x){return x.id===id;})[0];
-    if(!c)return;
-    dlgFrom=from;
-    $('dlgD').textContent='Compra del '+String(c.fecha).split('-').reverse().join('-')+' por '+clp(c.monto)+' ('+fmt(c.pts)+' puntos). Si la borras, deja de sumar a tus totales.';
-    $('dlgYes').onclick=function(){S.compras=S.compras.filter(function(x){return x.id!==id;});closeDlg();render();};
+  function askConfirm(title,text,yesLabel,fn,from){
+    dlgFrom=from||null;
+    $('dlgT').textContent=title;$('dlgD').textContent=text;$('dlgYes').textContent=yesLabel;
+    $('dlgYes').onclick=function(){closeDlg();fn();};
     $('dlg').hidden=false;
     document.addEventListener('keydown',dlgKey);
     $('dlgNo').focus();
   }
+  function askDel(id,from){
+    var c=S.compras.filter(function(x){return x.id===id;})[0];
+    if(!c)return;
+    askConfirm('¿Borrar esta compra?','Compra del '+String(c.fecha).split('-').reverse().join('-')+' por '+clp(c.monto)+' ('+fmt(c.pts)+' puntos). Si la borras, deja de sumar a tus totales.','Sí, borrar',function(){S.compras=S.compras.filter(function(x){return x.id!==id;});render();},from);
+  }
+  function resumen(list){
+    var pts=list.reduce(function(a,c){return a+(c.otro?0:c.pts);},0),mt=list.reduce(function(a,c){return a+c.monto;},0);
+    return list.length+(list.length===1?' compra':' compras')+' por '+clp(mt)+(pts?' ('+fmt(pts)+' puntos)':'')+'. Si las borras, dejan de sumar a tus totales. No se puede deshacer.';
+  }
+  $('cSel').addEventListener('click',function(){selMode=!selMode;sel={};render();});
+  $('cAll').addEventListener('click',function(){
+    var all=S.compras.length&&Object.keys(sel).length===S.compras.length;
+    sel={};if(!all)S.compras.forEach(function(c){sel[c.id]=true;});render();
+  });
+  $('compras').addEventListener('change',function(ev){
+    var cb=ev.target.closest('input.selc');if(!cb)return;
+    if(cb.checked)sel[cb.dataset.id]=true;else delete sel[cb.dataset.id];
+    render();
+  });
+  $('cDelSel').addEventListener('click',function(){
+    var list=S.compras.filter(function(c){return sel[c.id];});if(!list.length)return;
+    askConfirm('¿Borrar '+(list.length===1?'la compra seleccionada':'las '+list.length+' compras seleccionadas')+'?',resumen(list),'Sí, borrar',function(){
+      S.compras=S.compras.filter(function(c){return !sel[c.id];});sel={};selMode=false;render();
+    },$('cDelSel'));
+  });
+  $('cDelAll').addEventListener('click',function(){
+    if(!S.compras.length)return;
+    askConfirm('¿Borrar todas las compras?',resumen(S.compras),'Sí, borrar todas',function(){S.compras=[];sel={};selMode=false;render();},$('cDelAll'));
+  });
   $('dlgNo').addEventListener('click',closeDlg);
   $('dlg').addEventListener('click',function(e){if(e.target===$('dlg'))closeDlg();});
 
