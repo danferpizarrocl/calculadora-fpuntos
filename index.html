@@ -152,6 +152,9 @@ select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .hc>.gtxt{margin-top:auto}
 .n.pts>.gtxt{order:0;margin-top:0}
 .bens{display:grid;gap:6px;min-width:0}
+.bens ul.hitos{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px}
+.bens .ft.ok .fl{font-size:clamp(16px,4.2vw,19px)}
+.bens .ft.ok .bs{font:600 12px var(--f-body);color:var(--muted)}
 .bens .eyebrow{display:block}
 .wpill{display:block;background:var(--surface);border-radius:12px;padding:6px 10px;font:600 12px/1.45 var(--f-body);color:var(--accent)}
 .hc>.pbox,.hc>.hpart{flex:none}
@@ -770,7 +773,8 @@ details{display:grid;gap:12px}
       $('nyBtn').textContent='Cerrar '+S.year+' y empezar '+YEAR;
     }
     $('benef').innerHTML=benefits(acc,gy).map(function(b){
-      return '<li class="row"><b>'+b.t+'</b><span class="t">'+b.s+'</span><span class="r"><span class="pill">'+b.h+'</span></span></li>';
+      var ic=/confirmar|sin fecha/.test(b.h)?'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>':'<path d="M5 12l5 5l10 -10"/>';
+      return '<li class="ft ok"><span class="fl">'+b.t+'</span><span class="pill"><svg viewBox="0 0 24 24" aria-hidden="true">'+ic+'</svg>'+b.h+'</span><span class="bs">'+b.s+'</span></li>';
     }).join('');
     $('histBox').hidden=!S.hist.length;
     $('hist').innerHTML=S.hist.map(function(h){
