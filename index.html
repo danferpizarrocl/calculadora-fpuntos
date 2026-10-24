@@ -662,7 +662,7 @@ details{display:grid;gap:12px}
       var cls='step'+(s[0]<=m?' on':'')+(s[0]===m?' cur':'');
       return '<div class="'+cls+'"><b>x'+s[0]+'</b><small>'+(s[0]===m?'tu nivel':s[1])+'</small></div>';
     }).join('');
-    $('ladderNote').textContent='Con x'+m+', cada Fpunto te cuesta '+clp(S.set.tramoG/m)+' en el grupo Falabella y '+clp(S.set.tramoO/m)+' en otros comercios.';
+    $('ladderNote').textContent='Con x'+m+', cada Fpunto te cuesta '+clp(S.set.tramoG/m)+' en el holding Falabella y '+clp(S.set.tramoO/m)+' en otros comercios.';
 
     /* Formulario */
     if(d.active){
@@ -743,7 +743,7 @@ details{display:grid;gap:12px}
       var f=c.fecha.split('-').reverse().join('-');
       var est=c.otro?'Otro año, no suma':(c.ab?'Abonada':'Por abonar');
       var btn=c.otro?'':'<button type="button" class="mini" data-act="ab" data-id="'+c.id+'">'+(c.ab?'Marcar por abonar':'Marcar abonada')+'</button>';
-      ch+='<li class="row'+(selMode&&sel[c.id]?' picked':'')+'" data-id="'+c.id+'"><b>'+(selMode?'<input type="checkbox" class="selc" data-id="'+c.id+'"'+(sel[c.id]?' checked':'')+' aria-label="Seleccionar compra">':'')+f+'</b><span class="t">'+(c.donde==='g'?'Grupo':'Otros')+' · '+clp(c.monto)+' · x'+c.m+(c.m2>c.m?'→x'+c.m2:'')+'</span>'+
+      ch+='<li class="row'+(selMode&&sel[c.id]?' picked':'')+'" data-id="'+c.id+'"><b>'+(selMode?'<input type="checkbox" class="selc" data-id="'+c.id+'"'+(sel[c.id]?' checked':'')+' aria-label="Seleccionar compra">':'')+f+'</b><span class="t">'+(c.donde==='g'?'Holding':'Otros')+' · '+clp(c.monto)+' · x'+c.m+(c.m2>c.m?'→x'+c.m2:'')+'</span>'+
         '<span class="r">'+fmt(c.pts)+' pts<small>'+est+'</small></span>'+
         '<span class="acts">'+btn+'<button type="button" class="mini" data-act="del" data-id="'+c.id+'">Borrar</button></span></li>';
     });
@@ -891,7 +891,7 @@ details{display:grid;gap:12px}
   $('dlg').addEventListener('click',function(e){if(e.target===$('dlg'))closeDlg();});
 
   var fields=[
-    ['tramoG','Pesos por tramo, grupo'],['tramoO','Pesos por tramo, otros'],
+    ['tramoG','Pesos por tramo, holding'],['tramoO','Pesos por tramo, otros'],
     ['h80','Corte del 50%, en Fpuntos'],['h180','Corte del x4, en Fpuntos'],
     ['h220','Corte de $0, en Fpuntos'],['h350','Corte del x5, en Fpuntos'],
     ['g50','Gasto del 50%, en pesos'],['g100','Gasto de $0, en pesos']
