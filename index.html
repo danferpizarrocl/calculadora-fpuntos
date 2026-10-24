@@ -799,7 +799,7 @@ details{display:grid;gap:12px}
       }
       var f=c.fecha.split('-').reverse().join('-');
       var est=c.otro?'Otro año, no suma':(c.ab?'Abonada':'Por abonar');
-      var btn=c.otro?'':'<button type="button" class="mini" data-act="ab" data-id="'+c.id+'">'+(c.ab?'Marcar por abonar':'Marcar abonada')+'</button>';
+      var btn='';/* "Marcar abonada" desactivado por ahora; la lógica sigue en data-act="ab" */
       ch+='<li class="row'+(selMode&&sel[c.id]?' picked':'')+'" data-id="'+c.id+'"><b>'+(selMode?'<input type="checkbox" class="selc" data-id="'+c.id+'"'+(sel[c.id]?' checked':'')+' aria-label="Seleccionar compra">':'')+f+'</b><span class="t">'+(c.donde==='g'?'Holding':'Otros')+' · '+clp(c.monto)+' · x'+c.m+(c.m2>c.m?'→x'+c.m2:'')+'</span>'+
         '<span class="r">'+fmt(c.pts)+' pts<small>'+est+'</small></span>'+
         '<span class="acts">'+btn+'<button type="button" class="mini" data-act="del" data-id="'+c.id+'">Borrar</button></span></li>';
