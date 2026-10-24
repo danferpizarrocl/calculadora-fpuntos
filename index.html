@@ -38,7 +38,8 @@
   --accent:#3FD39B; --accent-fg:#04140D; --accent-soft:#15382B;
   --gold:#E6CB9A; --amber:#F2B25C; --amber-soft:#3A2A0E; --pts-blue:#7DB7F0; --pts-red:#F09A9A; --obj-red:#E57F7F; --sel-red:#E5645F; --sel-red-fg:#1F0807; color-scheme:dark;
 }
-*{box-sizing:border-box}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
 [hidden]{display:none!important}
 body{
   background:var(--bg); color:var(--fg); font-family:var(--f-body); font-size:15px; line-height:1.5;
@@ -481,6 +482,8 @@ details{display:grid;gap:12px}
   if(!S.vence||typeof S.vence!=='object')S.vence={mes:1,anio:null};
   delete S.sampleAcc;delete S.sampleMonto;delete S.tab;
   S.monto=null;
+  /* Migración única: el orden, los tamaños y los textos guardados con la disposición antigua (antes de unir las tarjetas) descuadraban la pantalla. Se vuelve a la disposición de fábrica una sola vez; los datos de puntos y compras no se tocan. */
+  if((S.lv||0)<2){S.order=null;S.sizes={};S.tx={};S.lv=2;S._t=Date.now();try{var c0=Object.assign({},S);delete c0.monto;localStorage.setItem(KEY,JSON.stringify(c0));}catch(e){}}
   if(!S.seen)S.seen=Date.now();
   /* Sincronización entre dispositivos: la capacidad db de Claude guarda una copia privada del estado en tu cuenta (data/users/<id>/fpuntos).
      S._t = momento del último cambio real; gana la copia con _t más nuevo. Si db no está disponible, todo sigue en este dispositivo. */
