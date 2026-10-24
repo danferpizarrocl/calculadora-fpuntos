@@ -806,6 +806,7 @@ details{display:grid;gap:12px}
     $('xInfoNote').textContent='El x4 se activa sobre '+fmt(S.set.h180)+' puntos y rige hasta fin del año siguiente. El x5 se activa sobre '+fmt(S.set.h350)+' puntos; su duración está por confirmar con Falabella.';
     var NOM={a50:'el 50% de descuento en administración',x4:'el x4',a100:'la administración gratis',x5:'el x5'};
     $('ptsInfo').classList.toggle('done',!nxt);
+    $('gBox').hidden=!nxt&&gT>=S.set.g100;
     $('ptsInfo').textContent=nxt?'Tu próximo objetivo es '+NOM[nxt.k]+': te faltan '+fmt(nxt.val+1-acc)+' puntos.':'Ya cumpliste todos los objetivos de este año.';
     $('hitsNote').textContent=(nxt?'El borde marca tu próximo objetivo. ':'No queda ningún corte por alcanzar este año. ')+
       'El gasto incluye el paso a x4 y x5 en el camino.'+(counts?' Incluye la compra que estás escribiendo, aún sin registrar.':'');
