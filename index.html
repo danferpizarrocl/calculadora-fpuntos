@@ -759,7 +759,7 @@ details{display:grid;gap:12px}
       return '<div class="ft'+(w?' ok':'')+(nxt&&nxt.k===f[0]?' next':'')+'"><span class="fl">'+f[1]+'</span>'+(w?'<span class="pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>'+w+'</span>':'<div class="fb"><span class="fn">'+fmt(h.val+1-acc)+'<small>Pts</small></span><span class="fc"><small>Por gastar</small>'+costo+'</span></div>')+'</div>';
     }).join('');
     [].forEach.call(document.querySelectorAll('#vseg button'),function(b){b.setAttribute('aria-pressed',String(b.dataset.v===(S.vista==='o'?'o':'g')));});
-    $('xInfoNote').textContent='El x4 se activa sobre '+fmt(S.set.h180)+' puntos y rige hasta fin del año siguiente. El x5, sobre '+fmt(S.set.h350)+', rige en el mismo periodo al cumplirse la meta.';
+    $('xInfoNote').textContent='El x4 se activa sobre '+fmt(S.set.h180)+' puntos y rige hasta fin del año siguiente. El x5 se activa sobre '+fmt(S.set.h350)+' puntos; su duración está por confirmar con Falabella.';
     var NOM={a50:'el 50% de descuento en administración',x4:'el x4',a100:'la administración gratis',x5:'el x5'};
     $('ptsInfo').classList.toggle('done',!nxt);
     $('ptsInfo').textContent=nxt?'Tu próximo objetivo es '+NOM[nxt.k]+': te faltan '+fmt(nxt.val+1-acc)+' puntos.':'Ya cumpliste todos los objetivos de este año.';
