@@ -21,7 +21,7 @@
 :root{
   --bg:#F1F5F2; --surface:#FFFFFF; --fg:#13221B; --muted:#58695F; --line:#D5DFD9;
   --accent:#0B7A52; --accent-fg:#FFFFFF; --accent-soft:#DCF0E6;
-  --amber:#9A5B00; --amber-soft:#FBEBCB; --pts-blue:#3F8FD6; --pts-red:#D46A6A;
+  --amber:#9A5B00; --amber-soft:#FBEBCB; --pts-blue:#3F8FD6; --pts-red:#D46A6A; --sel-red:#C62828; --sel-red-fg:#FFFFFF;
   --f-display:'Bricolage Grotesque',system-ui,sans-serif;
   --f-body:'Figtree',system-ui,sans-serif;
   --f-data:'IBM Plex Mono',ui-monospace,monospace;
@@ -30,13 +30,13 @@
   :root:not([data-theme="light"]){
     --bg:#0C1411; --surface:#142019; --fg:#E6F0EA; --muted:#92A69B; --line:#25352D;
     --accent:#3FD39B; --accent-fg:#04140D; --accent-soft:#15382B;
-    --amber:#F2B25C; --amber-soft:#3A2A0E; --pts-blue:#7DB7F0; --pts-red:#F09A9A; color-scheme:dark;
+    --amber:#F2B25C; --amber-soft:#3A2A0E; --pts-blue:#7DB7F0; --pts-red:#F09A9A; --sel-red:#E5645F; --sel-red-fg:#1F0807; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0C1411; --surface:#142019; --fg:#E6F0EA; --muted:#92A69B; --line:#25352D;
   --accent:#3FD39B; --accent-fg:#04140D; --accent-soft:#15382B;
-  --amber:#F2B25C; --amber-soft:#3A2A0E; --pts-blue:#7DB7F0; --pts-red:#F09A9A; color-scheme:dark;
+  --amber:#F2B25C; --amber-soft:#3A2A0E; --pts-blue:#7DB7F0; --pts-red:#F09A9A; --sel-red:#E5645F; --sel-red-fg:#1F0807; color-scheme:dark;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -67,6 +67,7 @@ input[type=text]:focus-visible,input[type=date]:focus-visible,button:focus-visib
 .seg button{font:600 14px var(--f-body);padding:10px 8px;border:0;background:transparent;color:var(--muted);cursor:pointer;min-width:0}
 .seg button+button{border-left:1px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+#dondeSeg button[data-d="o"][aria-pressed="true"]{background:var(--sel-red);color:var(--sel-red-fg)}
 .note{color:var(--muted);font-size:13px}
 .warn{background:var(--amber-soft);color:var(--amber);border-radius:10px;padding:10px 12px;font-size:14px;font-weight:500}
 .tag{display:inline-block;font:600 12px var(--f-body);padding:3px 9px;border-radius:99px;background:var(--amber-soft);color:var(--amber);text-transform:none;letter-spacing:0}
@@ -325,7 +326,7 @@ details{display:grid;gap:12px}
           <div class="n regc" id="c-reg" data-key="reg" aria-label="Registrar una compra">
       <h3 data-tx="t-reg">Registrar una compra</h3>
       <div class="seg" role="group" aria-label="Dónde fue la compra" id="dondeSeg">
-        <button type="button" data-d="g">Grupo Falabella</button>
+        <button type="button" data-d="g">Holding Falabella</button>
         <button type="button" data-d="o">Otros comercios</button>
       </div>
       <div class="grid2">
