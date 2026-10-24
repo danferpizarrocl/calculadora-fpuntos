@@ -750,6 +750,9 @@ details{display:grid;gap:12px}
     });
     /* Puntos que faltan: sección de la tarjeta principal, se actualiza con cada monto */
     var FAL=[['a50','50% de descuento'],['a100','100% de descuento'],['x4','Multiplicador por 4'],['x5','Multiplicador por 5']];
+    /* Ordenadas por cercanía: primero las cumplidas (les faltan 0) y luego las que piden menos puntos */
+    function falta(k){var h=byK[k];return why(h)?0:h.val+1-acc;}
+    FAL.sort(function(a,b){return falta(a[0])-falta(b[0])||byK[a[0]].val-byK[b[0]].val;});
     $('falg').innerHTML=FAL.map(function(f){
       var h=byK[f[0]],w=why(h);
       var costo=w?'':clp(gastoPara(acc,h.val+1,S.vista==='o'?S.set.tramoO:S.set.tramoG));
