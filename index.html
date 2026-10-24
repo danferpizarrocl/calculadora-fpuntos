@@ -21,7 +21,7 @@
 :root{
   --bg:#F1F5F2; --surface:#FFFFFF; --fg:#13221B; --muted:#58695F; --line:#D5DFD9;
   --accent:#0B7A52; --accent-fg:#FFFFFF; --accent-soft:#DCF0E6;
-  --amber:#9A5B00; --amber-soft:#FBEBCB; --pts-blue:#3F8FD6; --pts-red:#D46A6A; --obj-red:#B23A3A; --sel-red:#C62828; --sel-red-fg:#FFFFFF;
+  --gold:#B87508; --amber:#9A5B00; --amber-soft:#FBEBCB; --pts-blue:#3F8FD6; --pts-red:#D46A6A; --obj-red:#B23A3A; --sel-red:#C62828; --sel-red-fg:#FFFFFF;
   --f-display:'Bricolage Grotesque',system-ui,sans-serif;
   --f-body:'Figtree',system-ui,sans-serif;
   --f-data:'IBM Plex Mono',ui-monospace,monospace;
@@ -30,13 +30,13 @@
   :root:not([data-theme="light"]){
     --bg:#0C1411; --surface:#142019; --fg:#E6F0EA; --muted:#92A69B; --line:#25352D;
     --accent:#3FD39B; --accent-fg:#04140D; --accent-soft:#15382B;
-    --amber:#F2B25C; --amber-soft:#3A2A0E; --pts-blue:#7DB7F0; --pts-red:#F09A9A; --obj-red:#E57F7F; --sel-red:#E5645F; --sel-red-fg:#1F0807; color-scheme:dark;
+    --gold:#F7C677; --amber:#F2B25C; --amber-soft:#3A2A0E; --pts-blue:#7DB7F0; --pts-red:#F09A9A; --obj-red:#E57F7F; --sel-red:#E5645F; --sel-red-fg:#1F0807; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0C1411; --surface:#142019; --fg:#E6F0EA; --muted:#92A69B; --line:#25352D;
   --accent:#3FD39B; --accent-fg:#04140D; --accent-soft:#15382B;
-  --amber:#F2B25C; --amber-soft:#3A2A0E; --pts-blue:#7DB7F0; --pts-red:#F09A9A; --obj-red:#E57F7F; --sel-red:#E5645F; --sel-red-fg:#1F0807; color-scheme:dark;
+  --gold:#F7C677; --amber:#F2B25C; --amber-soft:#3A2A0E; --pts-blue:#7DB7F0; --pts-red:#F09A9A; --obj-red:#E57F7F; --sel-red:#E5645F; --sel-red-fg:#1F0807; color-scheme:dark;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -102,6 +102,10 @@ input[type=text]:focus-visible,input[type=date]:focus-visible,button:focus-visib
 .ft.ok .pill svg{width:14px;height:14px;flex:none}
 #nAcc{color:var(--pts-blue)}
 #nSaldo{color:var(--pts-red)}
+#nGasto{color:var(--gold)}
+.gline{font:600 13px/1.5 var(--f-body);letter-spacing:normal;text-transform:none;color:var(--amber)}
+.gline:empty{display:none}
+.gdiv{order:0}
 #ptsInfo{color:var(--obj-red);font-size:13px;background:transparent;padding-left:2px;padding-right:2px}
 #ptsInfo.done{font-size:clamp(20px,4.6vw,30px);line-height:1.25;padding:10px 14px}
 .scrim{position:fixed;inset:0;background:rgba(10,20,15,.5);display:grid;place-items:center;padding:16px;z-index:50}
@@ -363,7 +367,7 @@ details{display:grid;gap:12px}
       <div class="sect">
         <div class="mishead"><p class="eyebrow" id="misTitle"><span data-tx="t-mis">Mis Fpuntos (1 Fpunto = $1)</span> <span class="tag" id="prov" hidden>con compra sin registrar</span></p><div class="seg vseg" id="vseg" role="group" aria-label="Ver costo en"><button type="button" data-v="g" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-2v18M12 9h8v12M7 9h2M7 13h2M7 17h2M15 13h2M15 17h2"/></svg>Falabella</button><button type="button" data-v="o" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/></svg>Otros</button></div></div>
         <div class="nums" id="cards">
-          <div class="n pts" id="c-acc" data-key="acc"><div class="pbox"><div class="ppart"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><hr class="hdiv"><div class="ppart"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div></div><div class="fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span><div class="falg" id="falg"></div></div><div class="gtxt"><span class="wpill" id="ptsInfo"></span></div><div class="bens"><span class="eyebrow" data-tx="t-ben">Beneficios vigentes</span><ul class="hitos" id="benef"></ul></div><div class="gbox"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div></div>
+          <div class="n pts" id="c-acc" data-key="acc"><div class="ppart gpart"><span class="eyebrow" data-tx="t-gasto">Total gastado</span><div class="fitbox" id="nGastoBox"><span class="big" id="nGasto"></span></div><span class="gline" id="gLine"></span></div><hr class="hdiv gdiv"><div class="pbox"><div class="ppart"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><hr class="hdiv"><div class="ppart"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div></div><div class="fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span><div class="falg" id="falg"></div></div><div class="gtxt"><span class="wpill" id="ptsInfo"></span></div><div class="bens"><span class="eyebrow" data-tx="t-ben">Beneficios vigentes</span><ul class="hitos" id="benef"></ul></div><div class="gbox"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div></div>
           <div class="n regc" id="c-reg" data-key="reg" aria-label="Registrar una compra">
       <div class="reghead"><h3 data-tx="t-reg">Registrar una compra</h3><button type="button" class="mini hbtn lbtn" id="histBtn" aria-label="Abrir el historial de compras"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M5 6h.01M5 12h.01M5 18h.01"/></svg>Historial<span class="bdg" id="listCount" hidden></span></button></div>
       <div class="seg" role="group" aria-label="Dónde fue la compra" id="dondeSeg">
@@ -557,6 +561,12 @@ details{display:grid;gap:12px}
     if(best==null)return;
     var px=Math.max(20,Math.floor(best))+'px';
     pairs.forEach(function(p){var el=$(p[0]);if(el)el.style.fontSize=px;});
+    var ge=$('nGasto'),gb=$('nGastoBox');
+    if(ge&&gb&&gb.clientWidth){
+      ge.style.fontSize=px;
+      var gw=ge.offsetWidth;
+      if(gw>gb.clientWidth)ge.style.fontSize=Math.max(14,Math.floor(parseFloat(px)*gb.clientWidth/gw*0.98))+'px';
+    }
   }
   if(window.ResizeObserver){try{var ro=new ResizeObserver(function(){fitAcc();});ro.observe($('nAccBox'));ro.observe($('nSaldoBox'));}catch(e){}}
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitAcc);
@@ -697,6 +707,11 @@ details{display:grid;gap:12px}
     /* Totales */
     $('prov').hidden=!counts;
     $('nAcc').textContent=fmt(acc);
+    var gT=(S.gasto||0)+tot(S.compras).m+(counts?d.monto:0);
+    $('nGasto').textContent=clp(gT);
+    $('gLine').textContent=gT>=S.set.g100?'Ya llegaste al gasto para tener la administración en $0.':
+      gT>=S.set.g50?'Ya llegaste al gasto para el 50% de descuento. Te faltan '+clp(S.set.g100-gT)+' para tener la administración en $0.':
+      'Te faltan '+clp(S.set.g50-gT)+' para el 50% de descuento en administración.';
     fitAcc();
     $('startNote').textContent='Los puntos del año parten desde la cantidad de '+fmt(S.acc||0)+', registrada en Configuración, que corresponde a lo que figura en la app de Falabella. A ese valor se le suman las compras que registres aquí. Si necesitas corregirlo, puedes modificarlo cuando quieras desde el engranaje.';
     var sBase=(S.saldo==null&&!np)?null:(S.saldo||0)+pp;
