@@ -280,6 +280,7 @@ body.noscroll{overflow:hidden}
 .mh .macts{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px}
 .selm{width:22px;height:22px;margin:0;accent-color:var(--accent)}
 .selmode .mh .macts{display:none}
+.cpen [data-tx],.cpen [data-k]{outline:1px dashed var(--accent);outline-offset:2px;border-radius:4px;cursor:text;min-width:1ch}
 .lbtn{position:relative}
 .bdg{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:var(--accent);color:var(--accent-fg);font:700 11px/20px var(--f-body);text-align:center;font-variant-numeric:tabular-nums}
 button.mini{font:600 13px var(--f-body);padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
@@ -432,7 +433,7 @@ details{display:grid;gap:12px}
 <div class="toast" id="toast" hidden role="status"></div>
 
 <div class="cview" id="cview" hidden role="dialog" aria-modal="true" aria-labelledby="cvT"><div class="cvin">
-  <div class="cvhead"><button type="button" class="ghost" id="cvBack">← Volver</button><h2 id="cvT">Compras registradas</h2><button type="button" class="ico" id="cvEdit" aria-pressed="false" aria-label="Editar la lista" title="Editar la lista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/><path d="M13.5 6.5l4 4"/></svg></button></div>
+  <div class="cvhead"><button type="button" class="ghost" id="cvBack">← Volver</button><h2 id="cvT" data-tx="t-cvT">Compras registradas</h2><button type="button" class="ico" id="cvPen" aria-pressed="false" aria-label="Editar textos" title="Editar textos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/><path d="M13.5 6.5l4 4"/></svg></button><button type="button" class="ico" id="cvEdit" aria-pressed="false" aria-label="Seleccionar y borrar compras" title="Seleccionar y borrar compras"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3l8 -8"/><path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9"/></svg></button></div>
   <div class="pair csum" id="cSum2"></div>
   <div class="seg" role="group" aria-label="Filtrar por comercio" id="cfil">
     <button type="button" data-f="t" aria-pressed="true">Todas</button>
@@ -597,9 +598,9 @@ details{display:grid;gap:12px}
   function tot(list){return {n:list.length,m:list.reduce(function(a,c){return a+c.monto;},0),p:list.reduce(function(a,c){return a+(c.otro?0:c.pts);},0)};}
   function sumHtml(){
     var all=tot(S.compras),g=tot(S.compras.filter(function(c){return c.donde==='g';})),o=tot(S.compras.filter(function(c){return c.donde!=='g';}));
-    function st(l,v,s){return '<div class="stat"><span class="eyebrow">'+l+'</span><span class="v">'+v+'</span><small>'+s+'</small></div>';}
+    function st(l,v,s,k){return '<div class="stat"><span class="eyebrow" data-k="'+k+'">'+(S.tx[k]||l)+'</span><span class="v">'+v+'</span><small>'+s+'</small></div>';}
     function cn(n){return n+(n===1?' compra':' compras');}
-    return st('Compras registradas',all.n,'en total')+st('Total gastado',clp(all.m),fmt(all.p)+' puntos totales')+st('Holding Falabella',cn(g.n),clp(g.m)+' · '+fmt(g.p)+' pts')+st('Otros comercios',cn(o.n),clp(o.m)+' · '+fmt(o.p)+' pts');
+    return st('Compras registradas',all.n,'en total','c-s1')+st('Total gastado',clp(all.m),fmt(all.p)+' puntos totales','c-s2')+st('Holding Falabella',cn(g.n),clp(g.m)+' · '+fmt(g.p)+' pts','c-s3')+st('Otros comercios',cn(o.n),clp(o.m)+' · '+fmt(o.p)+' pts','c-s4');
   }
   function pend(){return S.compras.filter(function(c){return !c.ab&&!c.otro;});}
   function sumP(k){return pend().reduce(function(s,c){return s+c[k];},0);}
@@ -874,6 +875,7 @@ details{display:grid;gap:12px}
     $('cDelAll').hidden=selMode;$('cDelAll').textContent=cfil==='g'?'Borrar las de holding':cfil==='o'?'Borrar las de otros':'Borrar todas';
     /* Contadores */
     $('cSum2').innerHTML=sumHtml();
+    cpenApply();
     var cg=S.compras.filter(function(c){return c.donde==='g';}).length;
     [].forEach.call(document.querySelectorAll('#cfil button'),function(b){
       var k=b.dataset.f,n=k==='t'?S.compras.length:k==='g'?cg:S.compras.length-cg;
@@ -1093,15 +1095,53 @@ details{display:grid;gap:12px}
     $('cvBack').focus();
   }
   /* Modo edición de la lista: muestra las herramientas para borrar */
+  var SUMDEF={'c-s1':'Compras registradas','c-s2':'Total gastado','c-s3':'Holding Falabella','c-s4':'Otros comercios'};
+  function cpenOn(){return $('cview').classList.contains('cpen');}
+  function cpenApply(){
+    var on=cpenOn();
+    [].forEach.call(document.querySelectorAll('#cSum2 [data-k]'),function(el){
+      if(on){el.setAttribute('contenteditable','plaintext-only');if(el.contentEditable!=='plaintext-only')el.setAttribute('contenteditable','true');el.setAttribute('spellcheck','false');}
+      else el.removeAttribute('contenteditable');
+    });
+    var t=$('cvT');
+    if(on){t.setAttribute('contenteditable','plaintext-only');if(t.contentEditable!=='plaintext-only')t.setAttribute('contenteditable','true');t.setAttribute('spellcheck','false');}
+    else t.removeAttribute('contenteditable');
+  }
+  $('cSum2').addEventListener('input',function(ev){
+    var el=ev.target.closest('[data-k]');if(!el)return;
+    var k=el.dataset.k,v=el.textContent.replace(/\s+/g,' ').trim();
+    if(v&&v!==SUMDEF[k])S.tx[k]=v;else delete S.tx[k];
+    save();
+  });
+  $('cSum2').addEventListener('focusout',function(ev){
+    var el=ev.target.closest('[data-k]');if(!el)return;
+    if(!el.textContent.trim())el.textContent=SUMDEF[el.dataset.k];
+  });
+  $('cSum2').addEventListener('keydown',function(ev){if(ev.key==='Enter'&&ev.target.closest('[data-k]')){ev.preventDefault();ev.target.blur();}});
+  $('cSum2').addEventListener('paste',function(ev){
+    if(!ev.target.closest('[data-k]'))return;
+    ev.preventDefault();
+    var t=((ev.clipboardData||window.clipboardData).getData('text')||'').replace(/\s+/g,' ');
+    document.execCommand('insertText',false,t);
+  });
+  $('cvPen').addEventListener('click',function(){
+    var on=!cpenOn();
+    $('cview').classList.toggle('cpen',on);
+    $('cvPen').setAttribute('aria-pressed',String(on));
+    var t=on?'Terminar de editar textos':'Editar textos';$('cvPen').setAttribute('aria-label',t);$('cvPen').title=t;
+    if(!on&&document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+    cpenApply();
+  });
   function setCvEdit(on){
     $('cview').classList.toggle('cedit',on);
     $('cvEdit').setAttribute('aria-pressed',String(on));
-    var t=on?'Terminar de editar la lista':'Editar la lista';$('cvEdit').setAttribute('aria-label',t);$('cvEdit').title=t;
+    var t=on?'Terminar de seleccionar y borrar':'Seleccionar y borrar compras';$('cvEdit').setAttribute('aria-label',t);$('cvEdit').title=t;
     if(!on){selMode=false;sel={};}
   }
   $('cvEdit').addEventListener('click',function(){setCvEdit(!$('cview').classList.contains('cedit'));render();});
   function hideList(){
     $('cview').hidden=true;document.body.classList.remove('noscroll');
+    $('cview').classList.remove('cpen');$('cvPen').setAttribute('aria-pressed','false');cpenApply();
     setCvEdit(false);render();
     try{$('histBtn').focus();}catch(e){}
   }
@@ -1187,7 +1227,7 @@ details{display:grid;gap:12px}
     });
   });
   $('rstTx').addEventListener('click',function(){
-    S.tx={};txEls.forEach(function(el){el.textContent=DEFTX[el.dataset.tx];});save();
+    S.tx={};txEls.forEach(function(el){el.textContent=DEFTX[el.dataset.tx];});save();render();
   });
 
   /* Orden */
