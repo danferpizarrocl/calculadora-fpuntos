@@ -110,6 +110,12 @@ input[type=text]:focus-visible,input[type=date]:focus-visible,button:focus-visib
 .dlg p{margin:0;font:400 14px/1.45 var(--f-body);color:var(--muted)}
 .dlgb{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
 .dlgb button{min-height:42px;border-radius:10px;font:700 14px var(--f-body);cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+.dlg.qdlg{width:min(380px,100%);gap:14px;text-align:center}
+.dlg p.q{font:700 clamp(24px,6.6vw,38px)/1.15 var(--f-display);white-space:nowrap;color:var(--fg);font-variant-numeric:tabular-nums}
+.qdlg input{font:700 28px var(--f-data);text-align:center;padding:10px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--fg);width:100%;min-width:0}
+.qdlg input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.dlgb button:disabled{opacity:.5;cursor:default}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--fg);color:var(--bg);padding:12px 16px;border-radius:12px;font:600 14px var(--f-body);max-width:min(92vw,420px);text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.35)}
 .dlgb button.dng{background:var(--pts-red);border-color:var(--pts-red);color:#fff}
 #misTitle{font-size:24px;font-weight:800;line-height:1.1;letter-spacing:.02em}
 .sect{display:grid;gap:12px;min-width:0}
@@ -402,6 +408,9 @@ details{display:grid;gap:12px}
 
   <p class="foot">Los cortes piden superar la cifra, por eso cuento un punto extra. Cifras vigentes desde el 14 de septiembre de 2026. Verifícalas en el <a href="https://www.fpuntos.cl/reglamento-fpuntos-vigente" target="_blank" rel="noopener">reglamento oficial</a> y en <a href="https://www.bancofalabella.cl/fpuntos" target="_blank" rel="noopener">Banco Falabella</a>.</p>
 </main>
+
+<div class="scrim" id="qdlg" hidden><div class="dlg qdlg" role="dialog" aria-modal="true" aria-labelledby="qT"><h2 id="qT">Para borrar, resuelve esto</h2><p class="q" id="qQ"></p><input id="qIn" type="text" inputmode="numeric" autocomplete="off" aria-label="Resultado de la operación"><div class="dlgb"><button type="button" id="qNo">Cancelar</button><button type="button" class="dng" id="qOk" disabled>Borrar</button></div></div></div>
+<div class="toast" id="toast" hidden role="status"></div>
 
 <div class="cview" id="cview" hidden role="dialog" aria-modal="true" aria-labelledby="cvT"><div class="cvin">
   <div class="cvhead"><button type="button" class="ghost" id="cvBack">← Volver</button><h2 id="cvT">Compras registradas</h2><button type="button" class="ico" id="cvEdit" aria-pressed="false" aria-label="Editar la lista" title="Editar la lista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/><path d="M13.5 6.5l4 4"/></svg></button></div>
@@ -951,16 +960,44 @@ details{display:grid;gap:12px}
   });
   $('cDelSel').addEventListener('click',function(){
     var list=S.compras.filter(function(c){return sel[c.id];});if(!list.length)return;
+    var todas=list.length>1&&list.length===visible().length;
+    function hacer(){S.compras=S.compras.filter(function(c){return !sel[c.id];});sel={};selMode=false;render();}
     askConfirm('¿Borrar '+(list.length===1?'la compra seleccionada':'las '+list.length+' compras seleccionadas')+'?',resumen(list),'Sí, borrar',function(){
-      S.compras=S.compras.filter(function(c){return !sel[c.id];});sel={};selMode=false;render();
+      if(todas)askMath(hacer,$('cDelSel'));else hacer();
     },$('cDelSel'));
   });
   $('cDelAll').addEventListener('click',function(){
     var vis=visible();if(!vis.length)return;
     var ids={};vis.forEach(function(c){ids[c.id]=true;});
     var ttl=cfil==='t'?'¿Borrar todas las compras?':'¿Borrar las '+vis.length+(vis.length===1?' compra':' compras')+(cfil==='g'?' del holding Falabella?':' de otros comercios?');
-    askConfirm(ttl,resumen(vis),cfil==='t'?'Sí, borrar todas':'Sí, borrar',function(){S.compras=S.compras.filter(function(c){return !ids[c.id];});sel={};selMode=false;render();},$('cDelAll'));
+    askConfirm(ttl,resumen(vis),cfil==='t'?'Sí, borrar todas':'Sí, borrar',function(){
+      askMath(function(){S.compras=S.compras.filter(function(c){return !ids[c.id];});sel={};selMode=false;render();},$('cDelAll'));
+    },$('cDelAll'));
   });
+  /* Operación simple para confirmar un borrado en grupo: si la respuesta es correcta se borra; si no, no se borra nada y se vuelve a la pantalla principal */
+  var qFrom=null,qToast=null;
+  function toast(t){var e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(qToast);qToast=setTimeout(function(){e.hidden=true;},4000);}
+  function closeQ(){$('qdlg').hidden=true;if(qFrom&&document.body.contains(qFrom))try{qFrom.focus();}catch(e){}qFrom=null;}
+  function askMath(fn,from){
+    var r=function(n){return Math.floor(Math.random()*n);},a,b,op,ans;
+    if(r(2)){a=6+r(14);b=6+r(14);op='+';ans=a+b;}
+    else{a=14+r(17);b=3+r(a-6);op='−';ans=a-b;}
+    $('qQ').textContent='¿Cuánto es '+a+' '+op+' '+b+'?';
+    $('qIn').value='';$('qOk').disabled=true;qFrom=from||null;
+    $('qOk').onclick=function(){
+      var v=$('qIn').value.trim();if(v==='')return;
+      if(Number(v)===ans){closeQ();fn();return;}
+      closeQ();
+      if(!$('cview').hidden)closeList();
+      try{window.scrollTo(0,0);}catch(e){}
+      toast('Respuesta incorrecta: no se borró nada.');
+    };
+    $('qdlg').hidden=false;$('qIn').focus();
+  }
+  $('qIn').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'').slice(0,3);$('qOk').disabled=this.value==='';});
+  $('qIn').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();if(!$('qOk').disabled)$('qOk').click();}});
+  $('qNo').addEventListener('click',closeQ);
+  $('qdlg').addEventListener('click',function(e){if(e.target===$('qdlg'))closeQ();});
   /* Pantalla aparte de compras registradas */
   var cvPushed=false;
   function openList(){
@@ -987,7 +1024,7 @@ details{display:grid;gap:12px}
   $('histBtn').addEventListener('click',openList);
   $('cvBack').addEventListener('click',closeList);
   window.addEventListener('popstate',function(){if(!$('cview').hidden){cvPushed=false;hideList();}});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('cview').hidden&&$('dlg').hidden)closeList();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('qdlg').hidden)closeQ();else if(e.key==='Escape'&&!$('cview').hidden&&$('dlg').hidden)closeList();});
   [].forEach.call(document.querySelectorAll('#cfil button'),function(b){b.addEventListener('click',function(){cfil=b.dataset.f;sel={};render();});});
   $('dlgNo').addEventListener('click',closeDlg);
   $('dlg').addEventListener('click',function(e){if(e.target===$('dlg'))closeDlg();});
