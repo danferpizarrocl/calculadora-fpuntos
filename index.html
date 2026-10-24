@@ -290,7 +290,7 @@ details{display:grid;gap:12px}
       <button type="button" class="ico" id="editBtn" aria-pressed="false" aria-label="Editar" title="Editar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/><path d="M13.5 6.5l4 4"/></svg></button>
       <button type="button" class="ico" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema"></button>
       <button type="button" class="ico" id="fsBtn" aria-label="Pantalla completa" title="Pantalla completa" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8v-2a2 2 0 0 1 2 -2h2"/><path d="M4 16v2a2 2 0 0 0 2 2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M16 20h2a2 2 0 0 0 2 -2v-2"/></svg></button>
-      <button type="button" class="ico" id="cfgBtn"aria-expanded="false" aria-controls="cfg" aria-label="Configurar" title="Configurar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      <button type="button" class="ico lbtn" id="cfgBtn" aria-expanded="false" aria-controls="cfg" aria-label="Configurar" title="Configurar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"/><circle cx="12" cy="12" r="3"/></svg><span class="bdg" id="cfgBdg" hidden>!</span></button>
     </div>
   </header>
 
@@ -306,6 +306,12 @@ details{display:grid;gap:12px}
     <h2 id="nyTitle"></h2>
     <p class="note" id="nyText"></p>
     <button type="button" class="primary" id="nyBtn"></button>
+  </section>
+
+  <section class="card newyear" id="accAlert" aria-label="Falta tu acumulado" hidden>
+    <h2 id="aaTitle"></h2>
+    <p class="note" id="aaText"></p>
+    <div class="hbtns"><button type="button" class="primary" id="aaGo">Poner mi acumulado</button><button type="button" class="mini" id="aaZero">Dejarlo en 0</button></div>
   </section>
 
   <section class="card" id="cfg" aria-label="Configurar puntos iniciales" hidden>
@@ -671,7 +677,7 @@ details{display:grid;gap:12px}
     S.saldo=(S.saldo==null&&!pend().length)?null:(S.saldo||0)+pp;
     S.acc=0;S.gasto=null;S.compras=[];
     S.mult=earned>=4?earned:3;
-    S.year=YEAR;
+    S.year=YEAR;S.needAcc=true;
   }
 
   function render(){
@@ -778,6 +784,12 @@ details{display:grid;gap:12px}
     /* Nuevo año, beneficios e historial */
     var accNow=(S.acc||0)+pp;
     $('newYear').hidden=!ny;
+    var na=!!S.needAcc&&!ny;
+    $('accAlert').hidden=!na;$('cfgBdg').hidden=!na;
+    if(na){
+      $('aaTitle').textContent='Falta tu acumulado de '+S.year;
+      $('aaText').textContent='Empezó el año nuevo y tu acumulado quedó en 0. Copia el número de la página de Falabella en Configurar para que los cálculos y los objetivos sean los reales. Tu saldo ya está actualizado.';
+    }
     if(ny){
       $('nyTitle').textContent='Empezó '+YEAR;
       $('nyText').textContent='Voy a cerrar '+S.year+' con '+fmt(accNow)+' Fpuntos y guardarlo en "Años cerrados". Tus compras pasan al historial y tu acumulado de '+YEAR+' queda en 0, para que pongas el número de la app en Configurar. Los beneficios que ganaste quedan en "Beneficios vigentes". Tu saldo se mantiene.';
@@ -853,7 +865,7 @@ details{display:grid;gap:12px}
   }
   function bind(id,key){
     var el=$(id);
-    el.addEventListener('input',function(){liveFmt(el);S[key]=num(el.value);render();});
+    el.addEventListener('input',function(){liveFmt(el);S[key]=num(el.value);if(key==='acc')S.needAcc=false;render();});
     el.addEventListener('blur',function(){if(S[key]!=null)el.value=fmt(S[key]);});
     if(S[key]!=null)el.value=fmt(S[key]);
   }
@@ -900,6 +912,12 @@ details{display:grid;gap:12px}
     }
     document.addEventListener('pointerup',first,true);
   })();
+  $('aaGo').addEventListener('click',function(){
+    if($('cfg').hidden)$('cfgBtn').click();
+    $('cfg').scrollIntoView({behavior:'smooth',block:'center'});
+    try{$('acc').focus();$('acc').select();}catch(e){}
+  });
+  $('aaZero').addEventListener('click',function(){S.needAcc=false;render();});
   $('cfgBtn').addEventListener('click',function(){
     var open=$('cfg').hidden;
     $('cfg').hidden=!open;
