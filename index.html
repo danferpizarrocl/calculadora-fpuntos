@@ -21,7 +21,7 @@
 :root{
   --bg:#F1F5F2; --surface:#FFFFFF; --fg:#13221B; --muted:#58695F; --line:#D5DFD9;
   --accent:#0B7A52; --accent-fg:#FFFFFF; --accent-soft:#DCF0E6;
-  --amber:#9A5B00; --amber-soft:#FBEBCB; --pts-blue:#3F8FD6; --pts-red:#D46A6A; --sel-red:#C62828; --sel-red-fg:#FFFFFF;
+  --amber:#9A5B00; --amber-soft:#FBEBCB; --pts-blue:#3F8FD6; --pts-red:#D46A6A; --obj-red:#B23A3A; --sel-red:#C62828; --sel-red-fg:#FFFFFF;
   --f-display:'Bricolage Grotesque',system-ui,sans-serif;
   --f-body:'Figtree',system-ui,sans-serif;
   --f-data:'IBM Plex Mono',ui-monospace,monospace;
@@ -30,13 +30,13 @@
   :root:not([data-theme="light"]){
     --bg:#0C1411; --surface:#142019; --fg:#E6F0EA; --muted:#92A69B; --line:#25352D;
     --accent:#3FD39B; --accent-fg:#04140D; --accent-soft:#15382B;
-    --amber:#F2B25C; --amber-soft:#3A2A0E; --pts-blue:#7DB7F0; --pts-red:#F09A9A; --sel-red:#E5645F; --sel-red-fg:#1F0807; color-scheme:dark;
+    --amber:#F2B25C; --amber-soft:#3A2A0E; --pts-blue:#7DB7F0; --pts-red:#F09A9A; --obj-red:#E57F7F; --sel-red:#E5645F; --sel-red-fg:#1F0807; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0C1411; --surface:#142019; --fg:#E6F0EA; --muted:#92A69B; --line:#25352D;
   --accent:#3FD39B; --accent-fg:#04140D; --accent-soft:#15382B;
-  --amber:#F2B25C; --amber-soft:#3A2A0E; --pts-blue:#7DB7F0; --pts-red:#F09A9A; --sel-red:#E5645F; --sel-red-fg:#1F0807; color-scheme:dark;
+  --amber:#F2B25C; --amber-soft:#3A2A0E; --pts-blue:#7DB7F0; --pts-red:#F09A9A; --obj-red:#E57F7F; --sel-red:#E5645F; --sel-red-fg:#1F0807; color-scheme:dark;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -102,6 +102,7 @@ input[type=text]:focus-visible,input[type=date]:focus-visible,button:focus-visib
 .ft.ok .pill svg{width:14px;height:14px;flex:none}
 #nAcc{color:var(--pts-blue)}
 #nSaldo{color:var(--pts-red)}
+#ptsInfo{color:var(--obj-red)}
 .scrim{position:fixed;inset:0;background:rgba(10,20,15,.5);display:grid;place-items:center;padding:16px;z-index:50}
 .dlg{background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:14px;padding:18px;width:min(340px,100%);display:grid;gap:10px;box-shadow:0 12px 40px rgba(0,0,0,.35)}
 .dlg h2{margin:0;font:700 18px var(--f-display)}
