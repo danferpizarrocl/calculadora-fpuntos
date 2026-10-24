@@ -244,7 +244,12 @@ button.mini:disabled{opacity:.5;cursor:default}
 .cview{position:fixed;inset:0;z-index:40;background:var(--bg);color:var(--fg);overflow:auto;-webkit-overflow-scrolling:touch}
 .cvin{max-width:760px;margin:0 auto;padding:12px 14px 48px;display:grid;gap:12px}
 .cvhead{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:1;background:var(--bg);padding:6px 0}
-.cvhead h2{margin:0;font:700 20px var(--f-display)}
+.cvhead h2{margin:0;font:700 20px var(--f-display);flex:1;min-width:0}
+.cview:not(.cedit) .ctools,.cview:not(.cedit) button[data-act="del"]{display:none}
+.reghead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.reghead h3{margin:0}
+button.hbtn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;font-size:14px}
+button.hbtn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .cvin .seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface)}
 .cvin>ul.hitos{background:var(--surface);border-radius:12px;padding:12px}
 body.noscroll{overflow:hidden}
@@ -349,7 +354,7 @@ details{display:grid;gap:12px}
         <div class="nums" id="cards">
           <div class="n pts" id="c-acc" data-key="acc"><div class="pbox"><div class="ppart"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><hr class="hdiv"><div class="ppart"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div></div><div class="fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span><div class="falg" id="falg"></div></div><div class="bens"><span class="eyebrow" data-tx="t-ben">Beneficios vigentes</span><ul class="hitos" id="benef"></ul></div><div class="gtxt"><span class="wpill" id="ptsInfo"></span></div><div class="gbox"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div></div>
           <div class="n regc" id="c-reg" data-key="reg" aria-label="Registrar una compra">
-      <h3 data-tx="t-reg">Registrar una compra</h3>
+      <div class="reghead"><h3 data-tx="t-reg">Registrar una compra</h3><button type="button" class="mini hbtn" id="histBtn" aria-label="Abrir el historial de compras"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M5 6h.01M5 12h.01M5 18h.01"/></svg>Historial</button></div>
       <div class="seg" role="group" aria-label="Dónde fue la compra" id="dondeSeg">
         <button type="button" data-d="g">Holding Falabella</button>
         <button type="button" data-d="o">Otros comercios</button>
@@ -374,12 +379,6 @@ details{display:grid;gap:12px}
       </div>
     </section>
 
-
-    <section class="card" id="blk-compras" data-key="compras" aria-label="Compras registradas">
-      <h2 data-tx="t-compras">Compras registradas</h2>
-      <div class="pair csum" id="cSum"></div>
-      <button type="button" class="ghost" id="openList">Ver todas las compras</button>
-    </section>
   </div>
 
   <details class="card" id="histBox" hidden>
@@ -406,7 +405,7 @@ details{display:grid;gap:12px}
 </main>
 
 <div class="cview" id="cview" hidden role="dialog" aria-modal="true" aria-labelledby="cvT"><div class="cvin">
-  <div class="cvhead"><button type="button" class="ghost" id="cvBack">← Volver</button><h2 id="cvT">Compras registradas</h2></div>
+  <div class="cvhead"><button type="button" class="ghost" id="cvBack">← Volver</button><h2 id="cvT">Compras registradas</h2><button type="button" class="ico" id="cvEdit" aria-pressed="false" aria-label="Editar la lista" title="Editar la lista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/><path d="M13.5 6.5l4 4"/></svg></button></div>
   <div class="pair csum" id="cSum2"></div>
   <div class="seg" role="group" aria-label="Filtrar por comercio" id="cfil">
     <button type="button" data-f="t" aria-pressed="true">Todas</button>
@@ -817,7 +816,7 @@ details{display:grid;gap:12px}
     $('cDelSel').hidden=!selMode;$('cDelSel').disabled=!nSel;$('cDelSel').textContent='Borrar seleccionadas ('+nSel+')';
     $('cDelAll').hidden=selMode;$('cDelAll').textContent=cfil==='g'?'Borrar las de holding':cfil==='o'?'Borrar las de otros':'Borrar todas';
     /* Contadores */
-    var sm=sumHtml();$('cSum').innerHTML=sm;$('cSum2').innerHTML=sm;
+    $('cSum2').innerHTML=sumHtml();
     var cg=S.compras.filter(function(c){return c.donde==='g';}).length;
     [].forEach.call(document.querySelectorAll('#cfil button'),function(b){
       var k=b.dataset.f,n=k==='t'?S.compras.length:k==='g'?cg:S.compras.length-cg;
@@ -964,20 +963,28 @@ details{display:grid;gap:12px}
   /* Pantalla aparte de compras registradas */
   var cvPushed=false;
   function openList(){
-    $('cvT').textContent=(document.querySelector('[data-tx="t-compras"]')||{}).textContent||'Compras registradas';
+    setCvEdit(false);
     $('cview').hidden=false;document.body.classList.add('noscroll');$('cview').scrollTop=0;
     S.seen=Date.now();render();
     try{history.pushState({cv:1},'');cvPushed=true;}catch(e){cvPushed=false;}
     $('cvBack').focus();
   }
+  /* Modo edición de la lista: muestra las herramientas para borrar */
+  function setCvEdit(on){
+    $('cview').classList.toggle('cedit',on);
+    $('cvEdit').setAttribute('aria-pressed',String(on));
+    var t=on?'Terminar de editar la lista':'Editar la lista';$('cvEdit').setAttribute('aria-label',t);$('cvEdit').title=t;
+    if(!on){selMode=false;sel={};}
+  }
+  $('cvEdit').addEventListener('click',function(){setCvEdit(!$('cview').classList.contains('cedit'));render();});
   function hideList(){
     $('cview').hidden=true;document.body.classList.remove('noscroll');
-    selMode=false;sel={};render();
+    setCvEdit(false);render();
     try{$('listBtn').focus();}catch(e){}
   }
   function closeList(){if(cvPushed){cvPushed=false;try{history.back();return;}catch(e){}}hideList();}
   $('listBtn').addEventListener('click',openList);
-  $('openList').addEventListener('click',openList);
+  $('histBtn').addEventListener('click',openList);
   $('cvBack').addEventListener('click',closeList);
   window.addEventListener('popstate',function(){if(!$('cview').hidden){cvPushed=false;hideList();}});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('cview').hidden&&$('dlg').hidden)closeList();});
