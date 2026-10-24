@@ -235,6 +235,23 @@ button.mini:disabled{opacity:.5;cursor:default}
 .selc{width:22px;height:22px;margin:0 8px 0 0;vertical-align:middle;accent-color:var(--accent)}
 .selmode .row .acts{display:none}
 .row.picked{background:var(--accent-soft)}
+.cview{position:fixed;inset:0;z-index:40;background:var(--bg);color:var(--fg);overflow:auto;-webkit-overflow-scrolling:touch}
+.cvin{max-width:760px;margin:0 auto;padding:12px 14px 48px;display:grid;gap:12px}
+.cvhead{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:1;background:var(--bg);padding:6px 0}
+.cvhead h2{margin:0;font:700 20px var(--f-display)}
+.cvin .seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface)}
+.cvin>ul.hitos{background:var(--surface);border-radius:12px;padding:12px}
+body.noscroll{overflow:hidden}
+.csum{margin:0}
+.stat small{display:block;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.mh{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;background:var(--accent-soft);border-radius:10px;padding:10px 12px;margin-top:14px}
+.mh:first-child{margin-top:0}
+.mh b{font:700 16px var(--f-display);text-transform:capitalize}
+.mh .r{font:500 14px var(--f-data);text-align:right;font-variant-numeric:tabular-nums}
+.mh .t{grid-column:1/-1;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.mh+.row{border-top:0}
+.lbtn{position:relative}
+.bdg{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:var(--accent);color:var(--accent-fg);font:700 11px/20px var(--f-body);text-align:center;font-variant-numeric:tabular-nums}
 button.mini{font:600 13px var(--f-body);padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
 .hbtns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 button.ghost{font:600 14px var(--f-body);padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
@@ -256,7 +273,8 @@ details{display:grid;gap:12px}
       <button type="button" class="ico" id="editBtn" aria-pressed="false" aria-label="Editar" title="Editar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/><path d="M13.5 6.5l4 4"/></svg></button>
       <button type="button" class="ico" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema"></button>
       <button type="button" class="ico" id="fsBtn" aria-label="Pantalla completa" title="Pantalla completa" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8v-2a2 2 0 0 1 2 -2h2"/><path d="M4 16v2a2 2 0 0 0 2 2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M16 20h2a2 2 0 0 0 2 -2v-2"/></svg></button>
-      <button type="button" class="ico" id="cfgBtn" aria-expanded="false" aria-controls="cfg" aria-label="Configurar" title="Configurar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      <button type="button" class="ico lbtn" id="listBtn" aria-label="Compras registradas" title="Compras registradas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M5 6h.01M5 12h.01M5 18h.01"/></svg><span class="bdg" id="listCount" hidden></span></button>
+      <button type="button" class="ico" id="cfgBtn"aria-expanded="false" aria-controls="cfg" aria-label="Configurar" title="Configurar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"/><circle cx="12" cy="12" r="3"/></svg></button>
     </div>
   </header>
 
@@ -369,14 +387,8 @@ details{display:grid;gap:12px}
 
     <section class="card" id="blk-compras" data-key="compras" aria-label="Compras registradas">
       <h2 data-tx="t-compras">Compras registradas</h2>
-      <div class="ctools" id="ctools" hidden>
-        <button type="button" class="mini" id="cSel">Seleccionar</button>
-        <button type="button" class="mini" id="cAll" hidden>Seleccionar todas</button>
-        <button type="button" class="mini dng" id="cDelSel" hidden>Borrar seleccionadas</button>
-        <button type="button" class="mini dng" id="cDelAll">Borrar todas</button>
-      </div>
-      <ul class="hitos" id="compras"></ul>
-      <p class="note">Las compras por abonar suman a tus puntos, a tu saldo y a tu gasto del año. Cuando una aparezca en la app, actualiza arriba, en Configurar, tus puntos con el número oficial y márcala como abonada, así no se cuenta doble.</p>
+      <div class="pair csum" id="cSum"></div>
+      <button type="button" class="ghost" id="openList">Ver todas las compras</button>
     </section>
   </div>
 
@@ -387,6 +399,24 @@ details{display:grid;gap:12px}
 
   <p class="foot">Los cortes piden superar la cifra, por eso cuento un punto extra. Cifras vigentes desde el 14 de septiembre de 2026. Verifícalas en el <a href="https://www.fpuntos.cl/reglamento-fpuntos-vigente" target="_blank" rel="noopener">reglamento oficial</a> y en <a href="https://www.bancofalabella.cl/fpuntos" target="_blank" rel="noopener">Banco Falabella</a>.</p>
 </main>
+
+<div class="cview" id="cview" hidden role="dialog" aria-modal="true" aria-labelledby="cvT"><div class="cvin">
+  <div class="cvhead"><button type="button" class="ghost" id="cvBack">← Volver</button><h2 id="cvT">Compras registradas</h2></div>
+  <div class="pair csum" id="cSum2"></div>
+  <div class="seg" role="group" aria-label="Filtrar por comercio" id="cfil">
+    <button type="button" data-f="t" aria-pressed="true">Todas</button>
+    <button type="button" data-f="g" aria-pressed="false">Holding Falabella</button>
+    <button type="button" data-f="o" aria-pressed="false">Otros comercios</button>
+  </div>
+  <div class="ctools" id="ctools" hidden>
+    <button type="button" class="mini" id="cSel">Seleccionar</button>
+    <button type="button" class="mini" id="cAll" hidden>Seleccionar todas</button>
+    <button type="button" class="mini dng" id="cDelSel" hidden>Borrar seleccionadas</button>
+    <button type="button" class="mini dng" id="cDelAll">Borrar todas</button>
+  </div>
+  <ul class="hitos" id="compras"></ul>
+  <p class="note">Las compras por abonar suman a tus puntos, a tu saldo y a tu gasto del año. Cuando una aparezca en la app, actualiza arriba, en Configurar, tus puntos con el número oficial y márcala como abonada, así no se cuenta doble.</p>
+</div></div>
 
 <div class="scrim" id="dlg" hidden><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgT"><h2 id="dlgT">¿Borrar esta compra?</h2><p id="dlgD"></p><div class="dlgb"><button type="button" id="dlgNo">Cancelar</button><button type="button" class="dng" id="dlgYes">Sí, borrar</button></div></div></div>
 
@@ -422,7 +452,7 @@ details{display:grid;gap:12px}
   S.monto=null;
   /* Sincronización entre dispositivos: la capacidad db de Claude guarda una copia privada del estado en tu cuenta (data/users/<id>/fpuntos).
      S._t = momento del último cambio real; gana la copia con _t más nuevo. Si db no está disponible, todo sigue en este dispositivo. */
-  var selMode=false,sel={};
+  var selMode=false,sel={},cfil='t';
   var sync={on:false,ready:false,doc:null,pushing:false,again:false,timer:null};
   function strip(j){var o=JSON.parse(j);delete o._t;delete o.monto;return JSON.stringify(o);}
   function snapJson(){var c=Object.assign({},S);delete c._t;delete c.monto;return JSON.stringify(c);}
@@ -523,6 +553,15 @@ details{display:grid;gap:12px}
   var YEAR=String(new Date().getFullYear());
   if(!S.year)S.year=YEAR;
 
+  var MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  function visible(){return S.compras.filter(function(c){return cfil==='t'||(cfil==='g'?c.donde==='g':c.donde!=='g');});}
+  function tot(list){return {n:list.length,m:list.reduce(function(a,c){return a+c.monto;},0)};}
+  function sumHtml(){
+    var all=tot(S.compras),g=tot(S.compras.filter(function(c){return c.donde==='g';})),o=tot(S.compras.filter(function(c){return c.donde!=='g';}));
+    function st(l,v,s){return '<div class="stat"><span class="eyebrow">'+l+'</span><span class="v">'+v+'</span><small>'+s+'</small></div>';}
+    function cn(n){return n+(n===1?' compra':' compras');}
+    return st('Compras registradas',all.n,'en total')+st('Total gastado',clp(all.m),'en todas las compras')+st('Holding Falabella',cn(g.n),clp(g.m))+st('Otros comercios',cn(o.n),clp(o.m));
+  }
   function pend(){return S.compras.filter(function(c){return !c.ab&&!c.otro;});}
   function sumP(k){return pend().reduce(function(s,c){return s+c[k];},0);}
 
@@ -738,9 +777,20 @@ details{display:grid;gap:12px}
     }).join('');
 
     /* Compras registradas */
-    var cs=S.compras.slice().sort(function(a,b){return a.fecha<b.fecha?1:a.fecha>b.fecha?-1:b.id-a.id;});
-    var ch='';
+    var cs=visible().sort(function(a,b){return a.fecha<b.fecha?1:a.fecha>b.fecha?-1:b.id-a.id;});
+    var ch='',curMes='';
     cs.forEach(function(c){
+      var mk=String(c.fecha).slice(0,7);
+      if(mk!==curMes){
+        curMes=mk;
+        var ml=cs.filter(function(x){return String(x.fecha).slice(0,7)===mk;}),mt=tot(ml);
+        var sub='';
+        if(cfil==='t'){
+          var mg=tot(ml.filter(function(x){return x.donde==='g';})),mo=tot(ml.filter(function(x){return x.donde!=='g';}));
+          sub='<span class="t">Holding Falabella: '+mg.n+' · '+clp(mg.m)+' · Otros comercios: '+mo.n+' · '+clp(mo.m)+'</span>';
+        }
+        ch+='<li class="mh"><b>'+MESES[+mk.slice(5,7)-1]+' '+mk.slice(0,4)+'</b><span class="r">'+mt.n+(mt.n===1?' compra':' compras')+' · '+clp(mt.m)+'</span>'+sub+'</li>';
+      }
       var f=c.fecha.split('-').reverse().join('-');
       var est=c.otro?'Otro año, no suma':(c.ab?'Abonada':'Por abonar');
       var btn=c.otro?'':'<button type="button" class="mini" data-act="ab" data-id="'+c.id+'">'+(c.ab?'Marcar por abonar':'Marcar abonada')+'</button>';
@@ -748,16 +798,25 @@ details{display:grid;gap:12px}
         '<span class="r">'+fmt(c.pts)+' pts<small>'+est+'</small></span>'+
         '<span class="acts">'+btn+'<button type="button" class="mini" data-act="del" data-id="'+c.id+'">Borrar</button></span></li>';
     });
-    $('compras').innerHTML=ch||'<li class="note">Aún no registras compras.</li>';
-    Object.keys(sel).forEach(function(id){if(!S.compras.some(function(c){return String(c.id)===id;}))delete sel[id];});
+    $('compras').innerHTML=ch||'<li class="note">'+(S.compras.length?'No hay compras en este comercio.':'Aún no registras compras.')+'</li>';
+    Object.keys(sel).forEach(function(id){if(!cs.some(function(c){return String(c.id)===id;}))delete sel[id];});
     if(!S.compras.length)selMode=false;
     var nSel=Object.keys(sel).length;
-    $('ctools').hidden=!S.compras.length;
-    $('blk-compras').classList.toggle('selmode',selMode);
+    $('ctools').hidden=!cs.length;
+    $('cview').classList.toggle('selmode',selMode);
     $('cSel').textContent=selMode?'Cancelar selección':'Seleccionar';
-    $('cAll').hidden=!selMode;$('cAll').textContent=(nSel===S.compras.length)?'Quitar selección':'Seleccionar todas';
+    $('cAll').hidden=!selMode;$('cAll').textContent=(nSel===cs.length)?'Quitar selección':'Seleccionar todas';
     $('cDelSel').hidden=!selMode;$('cDelSel').disabled=!nSel;$('cDelSel').textContent='Borrar seleccionadas ('+nSel+')';
-    $('cDelAll').hidden=selMode;
+    $('cDelAll').hidden=selMode;$('cDelAll').textContent=cfil==='g'?'Borrar las de holding':cfil==='o'?'Borrar las de otros':'Borrar todas';
+    /* Contadores */
+    var sm=sumHtml();$('cSum').innerHTML=sm;$('cSum2').innerHTML=sm;
+    var cg=S.compras.filter(function(c){return c.donde==='g';}).length;
+    [].forEach.call(document.querySelectorAll('#cfil button'),function(b){
+      var k=b.dataset.f,n=k==='t'?S.compras.length:k==='g'?cg:S.compras.length-cg;
+      b.textContent=(k==='t'?'Todas':k==='g'?'Holding Falabella':'Otros comercios')+' ('+n+')';
+      b.setAttribute('aria-pressed',String(k===cfil));
+    });
+    $('listCount').textContent=S.compras.length>99?'99+':S.compras.length;$('listCount').hidden=!S.compras.length;
     save();
   }
 
@@ -870,8 +929,8 @@ details{display:grid;gap:12px}
   }
   $('cSel').addEventListener('click',function(){selMode=!selMode;sel={};render();});
   $('cAll').addEventListener('click',function(){
-    var all=S.compras.length&&Object.keys(sel).length===S.compras.length;
-    sel={};if(!all)S.compras.forEach(function(c){sel[c.id]=true;});render();
+    var vis=visible(),all=vis.length&&Object.keys(sel).length===vis.length;
+    sel={};if(!all)vis.forEach(function(c){sel[c.id]=true;});render();
   });
   $('compras').addEventListener('change',function(ev){
     var cb=ev.target.closest('input.selc');if(!cb)return;
@@ -885,9 +944,31 @@ details{display:grid;gap:12px}
     },$('cDelSel'));
   });
   $('cDelAll').addEventListener('click',function(){
-    if(!S.compras.length)return;
-    askConfirm('¿Borrar todas las compras?',resumen(S.compras),'Sí, borrar todas',function(){S.compras=[];sel={};selMode=false;render();},$('cDelAll'));
+    var vis=visible();if(!vis.length)return;
+    var ids={};vis.forEach(function(c){ids[c.id]=true;});
+    var ttl=cfil==='t'?'¿Borrar todas las compras?':'¿Borrar las '+vis.length+(vis.length===1?' compra':' compras')+(cfil==='g'?' del holding Falabella?':' de otros comercios?');
+    askConfirm(ttl,resumen(vis),cfil==='t'?'Sí, borrar todas':'Sí, borrar',function(){S.compras=S.compras.filter(function(c){return !ids[c.id];});sel={};selMode=false;render();},$('cDelAll'));
   });
+  /* Pantalla aparte de compras registradas */
+  var cvPushed=false;
+  function openList(){
+    $('cvT').textContent=(document.querySelector('[data-tx="t-compras"]')||{}).textContent||'Compras registradas';
+    $('cview').hidden=false;document.body.classList.add('noscroll');$('cview').scrollTop=0;
+    try{history.pushState({cv:1},'');cvPushed=true;}catch(e){cvPushed=false;}
+    $('cvBack').focus();
+  }
+  function hideList(){
+    $('cview').hidden=true;document.body.classList.remove('noscroll');
+    selMode=false;sel={};render();
+    try{$('listBtn').focus();}catch(e){}
+  }
+  function closeList(){if(cvPushed){cvPushed=false;try{history.back();return;}catch(e){}}hideList();}
+  $('listBtn').addEventListener('click',openList);
+  $('openList').addEventListener('click',openList);
+  $('cvBack').addEventListener('click',closeList);
+  window.addEventListener('popstate',function(){if(!$('cview').hidden){cvPushed=false;hideList();}});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('cview').hidden&&$('dlg').hidden)closeList();});
+  [].forEach.call(document.querySelectorAll('#cfil button'),function(b){b.addEventListener('click',function(){cfil=b.dataset.f;sel={};render();});});
   $('dlgNo').addEventListener('click',closeDlg);
   $('dlg').addEventListener('click',function(e){if(e.target===$('dlg'))closeDlg();});
 
