@@ -146,8 +146,6 @@ select{width:100%;font:500 18px var(--f-data);padding:11px 12px;border-radius:10
 select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .hc{display:flex;flex-direction:column;gap:4px}
 .n.pts{display:flex;flex-direction:column;gap:8px}
-.n.ctot .big{font-size:clamp(28px,8vw,44px)}
-.n.ctot .calc{font-size:13px}
 .gtxt{margin-top:auto;background:var(--accent-soft);border-radius:10px;padding:8px;font:600 13px/1.5 var(--f-body);color:var(--accent);order:5;min-width:0}
 .hc>.gtxt{margin-top:auto}
 .n.pts>.gtxt{order:0;margin-top:0}
@@ -323,7 +321,6 @@ details{display:grid;gap:12px}
       <div class="sect">
         <div class="mishead"><p class="eyebrow" id="misTitle"><span data-tx="t-mis">Mis Fpuntos (1 Fpunto = $1)</span> <span class="tag" id="prov" hidden>con compra sin registrar</span></p><div class="seg vseg" id="vseg" role="group" aria-label="Ver costo en"><button type="button" data-v="g" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-2v18M12 9h8v12M7 9h2M7 13h2M7 17h2M15 13h2M15 17h2"/></svg>Falabella</button><button type="button" data-v="o" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/></svg>Otros</button></div></div>
         <div class="nums" id="cards">
-          <div class="n ctot" id="c-tot" data-key="tot" aria-label="Total gastado en el año"><span class="eyebrow" data-tx="t-tot">Total</span><span class="big" id="nTot">—</span><span class="calc" id="totSub"></span></div>
           <div class="n pts" id="c-acc" data-key="acc"><div class="pbox"><div class="ppart"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><hr class="hdiv"><div class="ppart"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div></div><div class="fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span><div class="falg" id="falg"></div></div><div class="gtxt"><span class="wpill" id="ptsInfo"></span></div><div class="gbox"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div></div>
           <div class="n regc" id="c-reg" data-key="reg" aria-label="Registrar una compra">
       <h3 data-tx="t-reg">Registrar una compra</h3>
@@ -483,13 +480,12 @@ details{display:grid;gap:12px}
   function startSync(){
     var T=setTimeout(function(){sync.ready=true;},12000);
     try{
-      if(!window.claude||!window.claude.use){sync.ready=true;clearTimeout(T);setStat('Tus datos se guardan solo en este dispositivo.');loadCmrFile();return;}
+      if(!window.claude||!window.claude.use){sync.ready=true;clearTimeout(T);setStat('Tus datos se guardan solo en este dispositivo.');return;}
       Promise.all([window.claude.use('db'),window.claude.use('user')]).then(function(r){
         var db=r[0],user=r[1];
         return (user&&user.id?user.id():Promise.resolve(null)).then(function(id){
           clearTimeout(T);
           if(!db||!id){sync.ready=true;setStat('Tus datos se guardan solo en este dispositivo. Para sincronizar, abre la app con tu sesión de Claude iniciada.');return;}
-          loadCmrDb(db);
           sync.doc=db.doc('data/users/'+id+'/fpuntos');sync.on=true;
           sync.doc.onSnapshot(onRemote,function(){sync.ready=true;sync.on=false;setStat('No se pudo sincronizar ahora. Tus datos siguen guardados en este dispositivo.');});
         });
@@ -981,12 +977,11 @@ details{display:grid;gap:12px}
     });
   }
   if(S.order){
-    if(Array.isArray(S.order.cards)&&S.order.cards.indexOf('tot')<0)S.order.cards.unshift('tot');
     if(Array.isArray(S.order.cards)&&S.order.cards.indexOf('reg')<0){var ix=S.order.cards.indexOf('saldo');S.order.cards.splice(ix<0?0:ix+1,0,'reg');}
     applyOrder(blocksEl,S.order.blocks);applyOrder(cardsEl,S.order.cards);
   }
   function saveOrder(){S.order={blocks:keysOf(blocksEl),cards:keysOf(cardsEl)};save();}
-  var SZNAME=['chica','mediana','ancha'],DEFSZ={reg:3,acc:3,tot:3};
+  var SZNAME=['chica','mediana','ancha'],DEFSZ={reg:3,acc:3};
   function sizeIcon(n){return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="10" rx="2"/><rect x="4" y="9" width="'+[5,10,16][n-1]+'" height="6" rx="1" fill="currentColor" stroke="none"/></svg>';}
   function applySize(el){
     var n=S.sizes[el.dataset.key]||DEFSZ[el.dataset.key]||1;
@@ -1065,26 +1060,6 @@ details{display:grid;gap:12px}
     });
   });
 
-  /* Tarjeta "Total": gasto del año en curso (1 de enero al 31 de diciembre) tomado del Dashboard CMR.
-     Los datos llegan en cmr/resumen ({years:{"2026":{tot,c}},upd}); en la versión de GitHub, del archivo cmr-total.json. */
-  var CMR=null;
-  function drawTot(){
-    var big=$('nTot'),sub=$('totSub');if(!big||!sub)return;
-    var d=CMR&&CMR.years&&CMR.years[YEAR];
-    if(!d||typeof d.tot!=='number'){big.textContent='—';sub.textContent='Del 1 de enero al 31 de diciembre de '+YEAR+'. Aún no hay datos de este año desde el Dashboard CMR.';return;}
-    big.textContent=clp(d.tot);
-    var up='';
-    if(CMR.upd){var t=new Date(CMR.upd);if(!isNaN(t))up=' · datos del Dashboard CMR al '+t.toLocaleDateString('es-CL',{day:'numeric',month:'long',timeZone:'America/Santiago'});}
-    sub.textContent='Gastado del 1 de enero al 31 de diciembre de '+YEAR+(d.c?' · '+d.c+' compras':'')+up+'. El año sigue en curso.';
-  }
-  function loadCmrDb(db){
-    try{db.doc('cmr/resumen').onSnapshot(function(sn){if(sn&&sn.exists){CMR=sn.data();drawTot();}},function(){});}catch(e){}
-  }
-  function loadCmrFile(){
-    try{fetch('cmr-total.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(j){if(j&&j.years){CMR=j;drawTot();}}).catch(function(){});}catch(e){}
-  }
-
-  drawTot();
   render();
   startSync();
 })();
