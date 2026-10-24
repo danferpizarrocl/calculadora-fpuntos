@@ -102,7 +102,8 @@ input[type=text]:focus-visible,input[type=date]:focus-visible,button:focus-visib
 .ft.ok .pill svg{width:14px;height:14px;flex:none}
 #nAcc{color:var(--pts-blue)}
 #nSaldo{color:var(--pts-red)}
-#ptsInfo{color:var(--obj-red);font-size:clamp(20px,4.6vw,30px);line-height:1.25;padding:10px 14px}
+#ptsInfo{color:var(--obj-red);font-size:clamp(18px,3vw,24px)}
+#ptsInfo.done{font-size:clamp(20px,4.6vw,30px);line-height:1.25;padding:10px 14px}
 .scrim{position:fixed;inset:0;background:rgba(10,20,15,.5);display:grid;place-items:center;padding:16px;z-index:50}
 .dlg{background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:14px;padding:18px;width:min(340px,100%);display:grid;gap:10px;box-shadow:0 12px 40px rgba(0,0,0,.35)}
 .dlg h2{margin:0;font:700 18px var(--f-display)}
@@ -760,6 +761,7 @@ details{display:grid;gap:12px}
     [].forEach.call(document.querySelectorAll('#vseg button'),function(b){b.setAttribute('aria-pressed',String(b.dataset.v===(S.vista==='o'?'o':'g')));});
     $('xInfoNote').textContent='El x4 se activa sobre '+fmt(S.set.h180)+' puntos y rige hasta fin del año siguiente. El x5, sobre '+fmt(S.set.h350)+', rige en el mismo periodo al cumplirse la meta.';
     var NOM={a50:'el 50% de descuento en administración',x4:'el x4',a100:'la administración gratis',x5:'el x5'};
+    $('ptsInfo').classList.toggle('done',!nxt);
     $('ptsInfo').textContent=nxt?'Tu próximo objetivo es '+NOM[nxt.k]+': te faltan '+fmt(nxt.val+1-acc)+' puntos.':'Ya cumpliste todos los objetivos de este año.';
     $('hitsNote').textContent=(nxt?'El borde marca tu próximo objetivo. ':'No queda ningún corte por alcanzar este año. ')+
       'El gasto incluye el paso a x4 y x5 en el camino.'+(counts?' Incluye la compra que estás escribiendo, aún sin registrar.':'');
