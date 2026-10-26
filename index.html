@@ -274,8 +274,8 @@ button.mini:disabled{opacity:.5;cursor:default}
 .selc{width:22px;height:22px;margin:0 8px 0 0;vertical-align:middle;accent-color:var(--accent)}
 .selmode .row .acts{display:none}
 .cview:not(.cedit) .mh .msel{display:none}
-#compras li.row{touch-action:pan-y;position:relative}
-.cview.cedit:not(.selmode) #compras li.row{cursor:grab}
+.row .r button.rdel{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;margin:4px -4px -4px 0;border-radius:10px;border:1px solid var(--pts-red);background:transparent;color:var(--pts-red);padding:0;cursor:pointer}
+.row .r button.rdel svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 select.dsel{width:auto;max-width:100%;font:600 13px var(--f-body);padding:4px 8px;border-radius:8px;margin-right:2px}
 select.dsel.dg{color:var(--accent)}
 select.dsel.do{color:var(--obj-red)}
@@ -894,7 +894,7 @@ details{display:grid;gap:12px}
       var est=c.otro?'Otro año, no suma':(c.ab?'Abonada':'Por abonar');
       var btn='';/* "Marcar abonada" desactivado por ahora; la lógica sigue en data-act="ab" */
       ch+='<li class="row'+(selOn(mk)&&sel[c.id]?' picked':'')+'" data-id="'+c.id+'"><b>'+(selOn(mk)?'<input type="checkbox" class="selc" data-id="'+c.id+'"'+(sel[c.id]?' checked':'')+' aria-label="Seleccionar compra">':'')+f+'</b><span class="t">'+(cEd&&!selMode?'<select class="dsel '+(c.donde==='g'?'dg':'do')+'" data-id="'+c.id+'" aria-label="Dónde fue la compra"><option value="g"'+(c.donde==='g'?' selected':'')+'>Holding Falabella</option><option value="o"'+(c.donde!=='g'?' selected':'')+'>Otros comercios</option></select>':(c.donde==='g'?'Holding':'Otros'))+' · '+clp(c.monto)+' · x'+c.m+(c.m2>c.m?'→x'+c.m2:'')+'</span>'+
-        '<span class="r">'+fmt(c.pts)+' pts<small>'+est+'</small></span>'+
+        '<span class="r">'+fmt(c.pts)+' pts<small>'+est+'</small>'+(selOn(mk)?'':'<button type="button" class="rdel" data-act="del" data-id="'+c.id+'" aria-label="Borrar esta compra" title="Borrar esta compra"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></svg></button>')+'</span>'+
         (btn?'<span class="acts">'+btn+'</span>':'')+'</li>';
     });
     $('compras').innerHTML=ch||'<li class="note">'+(S.compras.length?'No hay compras en este comercio.':'Aún no registras compras.')+'</li>';
@@ -1067,60 +1067,6 @@ details{display:grid;gap:12px}
     S.compras.forEach(function(c){if(c.id===id)c.ab=!c.ab;});
     render();
   });
-  /* Deslizar una compra hacia la derecha, de un extremo al otro, para borrarla (solo en modo editar y sin selección) */
-  (function(){
-    var box=$('compras'),sw=null,swiped=false;
-    function reset(li){li.style.transition='transform .18s,background .18s';li.style.transform='';li.style.background='';setTimeout(function(){li.style.transition='';},220);}
-    function start(e,x,y,pid,mouse){
-      var li=e.target.closest('li.row');
-      if(!li||selMode||selMk||!$('cview').classList.contains('cedit')||$('cview').classList.contains('cpen'))return;
-      if(e.target.closest('input,select,button,[data-k]'))return;
-      sw={li:li,x:x,y:y,on:false,id:+li.dataset.id,w:li.getBoundingClientRect().width,pid:pid,mouse:mouse};
-    }
-    function move(e,x,y){
-      var dx=x-sw.x,dy=y-sw.y;
-      if(!sw.on){
-        if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){sw=null;return;}
-        if(dx>10)sw.on=true;else return;
-      }
-      dx=Math.max(0,Math.min(dx,sw.w));
-      var k=Math.min(1,dx/(sw.w*0.8));
-      sw.li.style.transition='none';
-      sw.li.style.transform='translateX('+dx+'px)';
-      sw.li.style.background='rgba(200,50,50,'+(0.12+0.4*k)+')';
-      sw.go=dx>=sw.w*0.8;
-      if(e.cancelable)e.preventDefault();
-    }
-    function fin(ok){
-      if(!sw)return;
-      var s0=sw;sw=null;
-      if(!s0.on)return;
-      swiped=true;setTimeout(function(){swiped=false;},350);
-      reset(s0.li);
-      if(s0.go&&ok)askDel(s0.id,null);
-    }
-    /* Dedo (celular y tablet): eventos táctiles */
-    box.addEventListener('touchstart',function(e){
-      if(e.touches.length!==1){sw=null;return;}
-      var t=e.touches[0];start(e,t.clientX,t.clientY,0,false);
-    },{passive:true});
-    box.addEventListener('touchmove',function(e){
-      if(!sw||sw.mouse)return;
-      var t=e.touches[0];move(e,t.clientX,t.clientY);
-    },{passive:false});
-    box.addEventListener('touchend',function(){if(sw&&!sw.mouse)fin(true);});
-    box.addEventListener('touchcancel',function(){if(sw&&!sw.mouse)fin(false);});
-    /* Mouse */
-    box.addEventListener('pointerdown',function(e){
-      if(e.pointerType!=='mouse'||e.button!==0)return;
-      start(e,e.clientX,e.clientY,e.pointerId,true);
-      if(sw)try{box.setPointerCapture(e.pointerId);}catch(x){}
-    });
-    box.addEventListener('pointermove',function(e){if(sw&&sw.mouse&&e.pointerId===sw.pid)move(e,e.clientX,e.clientY);});
-    box.addEventListener('pointerup',function(e){if(sw&&sw.mouse)fin(true);});
-    box.addEventListener('pointercancel',function(e){if(sw&&sw.mouse)fin(false);});
-    box.addEventListener('click',function(e){if(swiped){e.stopPropagation();e.preventDefault();}},true);
-  })();
   /* Ventana de confirmación para borrar una compra */
   var dlgFrom=null;
   function closeDlg(){$('dlg').hidden=true;document.removeEventListener('keydown',dlgKey);if(dlgFrom&&document.body.contains(dlgFrom))try{dlgFrom.focus();}catch(e){}dlgFrom=null;}
