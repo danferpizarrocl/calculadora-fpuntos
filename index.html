@@ -47,15 +47,16 @@ body{
   padding-left:max(16px,env(safe-area-inset-left,0px));
   padding-right:max(16px,env(safe-area-inset-right,0px));
 }
-.wrap{max-width:720px;margin:0 auto;display:grid;gap:14px}
+.wrap{max-width:720px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
 h1,h2,h3,p{margin:0}
-h1{font-family:var(--f-display);font-size:clamp(44px,20vw,120px);line-height:1.1;font-weight:700;text-wrap:balance}
+h1{font-family:var(--f-display);font-size:40px;line-height:1.1;font-weight:700;text-wrap:balance}
 h2{font-family:var(--f-display);font-size:20px;line-height:1.2;font-weight:600;text-wrap:balance}
 h3{font-family:var(--f-display);font-size:18px;line-height:1.2;font-weight:600}
 .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
-.head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px}
-.head{row-gap:10px;margin-bottom:-8px}
-.head>div:first-child{flex:1 1 100%;min-width:0}
+.head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:nowrap;gap:12px}
+.head{margin-bottom:-6px;align-items:flex-end}
+.head>div:first-child{flex:1 1 0;min-width:0}
+.head h1{white-space:nowrap;font-size:40px}
 .head button{flex:none}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:14px;min-width:0}
 .field{display:grid;gap:6px;min-width:0}
@@ -1354,6 +1355,24 @@ details{display:grid;gap:12px}
       else el.removeAttribute('contenteditable');
     });
   });
+
+  /* El título "Fpuntos" se ajusta solo para llenar el espacio que dejan los tres botones */
+  (function(){
+    var h=document.querySelector('.head h1'),box=h&&h.parentNode;
+    if(!h||!box)return;
+    function fitTitle(){
+      var w=box.clientWidth;if(!w)return;
+      h.style.fontSize='100px';
+      var r=document.createRange();r.selectNodeContents(h);
+      var tw=r.getBoundingClientRect().width;if(!tw)return;
+      h.style.fontSize=Math.max(20,Math.min(140,Math.floor(100*w/tw*0.97)))+'px';
+    }
+    if(window.ResizeObserver){try{new ResizeObserver(fitTitle).observe(box);}catch(e){}}
+    window.addEventListener('resize',fitTitle);
+    h.addEventListener('input',fitTitle);h.addEventListener('blur',fitTitle);
+    if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitTitle);
+    fitTitle();
+  })();
 
   render();
   startSync();
