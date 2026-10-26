@@ -107,6 +107,9 @@ input[type=text]:focus-visible,input[type=date]:focus-visible,button:focus-visib
 #nAcc{color:var(--pts-blue)}
 #nSaldo{color:var(--pts-red)}
 #nGasto{color:var(--gold)}
+.ghead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#gEye.geye,#gEye.geye[aria-pressed="true"]{width:34px;height:34px;margin:-6px -4px -6px 0;background:transparent;border:0;color:var(--muted)}
+button.geye svg{width:18px;height:18px}
 #gLine{color:var(--obj-red);font-size:13px;background:transparent;padding-left:2px;padding-right:2px}
 #gLine.done{font-size:clamp(20px,4.6vw,30px);line-height:1.25;padding:10px 14px}
 .gpart .gtxt{order:0;margin-top:0}
@@ -385,7 +388,7 @@ details{display:grid;gap:12px}
       <div class="sect">
         <div class="mishead"><p class="eyebrow" id="misTitle"><span data-tx="t-mis">Mis Fpuntos (1 Fpunto = $1)</span> <span class="tag" id="prov" hidden>con compra sin registrar</span></p><div class="seg vseg" id="vseg" role="group" aria-label="Ver costo en"><button type="button" data-v="g" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-2v18M12 9h8v12M7 9h2M7 13h2M7 17h2M15 13h2M15 17h2"/></svg>Falabella</button><button type="button" data-v="o" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/></svg>Otros</button></div></div>
         <div class="nums" id="cards">
-          <div class="n pts" id="c-acc" data-key="acc"><div class="ppart gpart"><span class="eyebrow" data-tx="t-gasto">Total gastado</span><div class="fitbox" id="nGastoBox"><span class="big" id="nGasto"></span></div><div class="gtxt" id="gBox"><span class="wpill" id="gLine"></span></div></div><hr class="hdiv gdiv"><div class="pbox"><div class="ppart"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><hr class="hdiv"><div class="ppart"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div></div><div class="fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span><div class="falg" id="falg"></div></div><div class="gtxt"><span class="wpill" id="ptsInfo"></span></div><div class="bens"><span class="eyebrow" data-tx="t-ben">Beneficios vigentes</span><ul class="hitos" id="benef"></ul></div><div class="gbox"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div></div>
+          <div class="n pts" id="c-acc" data-key="acc"><div class="ppart gpart"><div class="ghead"><span class="eyebrow" data-tx="t-gasto">Total gastado</span><button type="button" class="ico geye" id="gEye" aria-pressed="false" aria-label="Ocultar el monto gastado" title="Ocultar el monto gastado"><svg id="gEyeSvg" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/></svg></button></div><div class="fitbox" id="nGastoBox"><span class="big" id="nGasto"></span></div><div class="gtxt" id="gBox"><span class="wpill" id="gLine"></span></div></div><hr class="hdiv gdiv"><div class="pbox"><div class="ppart"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><hr class="hdiv"><div class="ppart"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div></div><div class="fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span><div class="falg" id="falg"></div></div><div class="gtxt"><span class="wpill" id="ptsInfo"></span></div><div class="bens"><span class="eyebrow" data-tx="t-ben">Beneficios vigentes</span><ul class="hitos" id="benef"></ul></div><div class="gbox"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div></div>
           <div class="n regc" id="c-reg" data-key="reg" aria-label="Registrar una compra">
       <div class="reghead"><h3 data-tx="t-reg">Registrar una compra</h3><button type="button" class="mini hbtn lbtn" id="histBtn" aria-label="Abrir el historial de compras"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M5 6h.01M5 12h.01M5 18h.01"/></svg>Historial<span class="bdg" id="listCount" hidden></span></button></div>
       <div class="seg" role="group" aria-label="Dónde fue la compra" id="dondeSeg">
@@ -730,12 +733,16 @@ details{display:grid;gap:12px}
     $('prov').hidden=!counts;
     $('nAcc').textContent=fmt(acc);
     var gT=(S.gasto||0)+tot(S.compras).m+(counts?d.monto:0);
-    $('nGasto').textContent=clp(gT);
+    var hG=!!S.hideG,mG=function(v){return hG?'$•••••':clp(v);};
+    $('nGasto').textContent=hG?'$•••••••':clp(gT);
+    $('gEye').setAttribute('aria-pressed',String(hG));
+    var tE=hG?'Mostrar el monto gastado':'Ocultar el monto gastado';$('gEye').setAttribute('aria-label',tE);$('gEye').title=tE;
+    $('gEyeSvg').innerHTML='<path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/>'+(hG?'<path d="M3 3l18 18"/>':'');
     var gDone=gT>=S.set.g100;
     $('gLine').classList.toggle('done',gDone);
     $('gLine').textContent=gDone?'Ya cumpliste todos los objetivos de gasto de este año.':
-      gT>=S.set.g50?'Tu próximo objetivo es la administración en $0: te faltan '+clp(S.set.g100-gT)+'.':
-      'Tu próximo objetivo es el 50% de descuento en administración: te faltan '+clp(S.set.g50-gT)+'.';
+      gT>=S.set.g50?'Tu próximo objetivo es la administración en $0: te faltan '+mG(S.set.g100-gT)+'.':
+      'Tu próximo objetivo es el 50% de descuento en administración: te faltan '+mG(S.set.g50-gT)+'.';
     fitAcc();
     $('startNote').textContent='Los puntos del año parten desde la cantidad de '+fmt(S.acc||0)+', registrada en Configuración, que corresponde a lo que figura en la app de Falabella. A ese valor se le suman las compras que registres aquí. Si necesitas corregirlo, puedes modificarlo cuando quieras desde el engranaje.';
     var sBase=(S.saldo==null&&!np)?null:(S.saldo||0)+pp;
@@ -937,6 +944,7 @@ details{display:grid;gap:12px}
     $('gasto').value='';
     render();
   });
+  $('gEye').addEventListener('click',function(){S.hideG=!S.hideG;render();});
   $('aaGo').addEventListener('click',function(){
     if($('cfg').hidden)$('cfgBtn').click();
     $('cfg').scrollIntoView({behavior:'smooth',block:'center'});
