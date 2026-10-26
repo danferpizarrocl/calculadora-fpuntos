@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
-<style>*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0}</style>
+<style>*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 <title>Calculadora Fpuntos</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -53,7 +53,8 @@ h1{font-family:var(--f-display);font-size:30px;line-height:1.1;font-weight:700;t
 h2{font-family:var(--f-display);font-size:20px;line-height:1.2;font-weight:600;text-wrap:balance}
 h3{font-family:var(--f-display);font-size:18px;line-height:1.2;font-weight:600}
 .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
-.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px}
+.head>div:first-child{flex:1 1 190px;min-width:0}
 .head button{flex:none}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:14px;min-width:0}
 .field{display:grid;gap:6px;min-width:0}
@@ -288,7 +289,7 @@ body.noscroll{overflow:hidden}
 .lbtn{position:relative}
 .bdg{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:var(--accent);color:var(--accent-fg);font:700 11px/20px var(--f-body);text-align:center;font-variant-numeric:tabular-nums}
 button.mini{font:600 13px var(--f-body);padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
-.hbtns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.hbtns{display:flex;gap:8px;flex-wrap:nowrap;justify-content:flex-end;margin-left:auto}
 button.ghost{font:600 14px var(--f-body);padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
 details summary{cursor:pointer;font-family:var(--f-display);font-weight:600;font-size:16px}
 details{display:grid;gap:12px}
