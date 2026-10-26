@@ -287,6 +287,8 @@ body.noscroll{overflow:hidden}
 .mh .macts{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px}
 .selm{width:22px;height:22px;margin:0;accent-color:var(--accent)}
 .selmode .mh .macts{display:none}
+.mh .medit{grid-column:2;grid-row:1;justify-self:end;width:36px;height:36px;margin:-4px -4px 0 0}
+.mh .medit svg{width:18px;height:18px}
 .cpen [data-tx],.cpen [data-k]{outline:1px dashed var(--accent);outline-offset:2px;border-radius:4px;cursor:text;min-width:1ch}
 .lbtn{position:relative}
 .bdg{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:var(--accent);color:var(--accent-fg);font:700 11px/20px var(--f-body);text-align:center;font-variant-numeric:tabular-nums}
@@ -858,6 +860,7 @@ details{display:grid;gap:12px}
         }
         var op=mOpen(mk);
         ch+='<li class="mh" data-mk="'+mk+'" role="button" tabindex="0" aria-expanded="'+op+'"><b>'+(selMode?'<input type="checkbox" class="selm" data-mk="'+mk+'" aria-label="Seleccionar todo el mes">':'')+'<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6l-6 6"/></svg>'+MESES[+mk.slice(5,7)-1]+' '+mk.slice(0,4)+'</b><span class="r">'+mt.n+(mt.n===1?' compra':' compras')+' · '+clp(mt.m)+' · '+fmt(mt.p)+' pts</span>'+sub+
+          '<button type="button" class="ico medit" data-act="medit" aria-pressed="'+cEd+'" aria-label="Editar la lista" title="Editar la lista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3l8 -8"/><path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9"/></svg></button>'+
           '<span class="macts"><button type="button" class="mini dng" data-act="delm" data-mk="'+mk+'">Borrar mes</button></span></li>';
       }
       if(!mOpen(mk))return;
@@ -934,30 +937,6 @@ details{display:grid;gap:12px}
     $('gasto').value='';
     render();
   });
-  /* Pantalla completa: se pide en el primer toque (los navegadores no la dejan activar solos). Si no se puede, la app sigue normal. */
-  (function(){
-    var el=document.documentElement,btn=$('fsBtn')||document.createElement('button');
-    var can=!!(el.requestFullscreen||el.webkitRequestFullscreen);
-    function cur(){return document.fullscreenElement||document.webkitFullscreenElement;}
-    function ask(){
-      try{var p=(el.requestFullscreen||el.webkitRequestFullscreen).call(el);if(p&&p.catch)p.catch(function(){});}catch(e){}
-    }
-    function label(){var t=cur()?'Salir de pantalla completa':'Pantalla completa';btn.setAttribute('aria-label',t);btn.title=t;}
-    if(!can)return;
-    btn.hidden=false;
-    document.addEventListener('fullscreenchange',label);
-    document.addEventListener('webkitfullscreenchange',label);
-    btn.addEventListener('click',function(e){
-      e.stopPropagation();
-      if(cur()){try{(document.exitFullscreen||document.webkitExitFullscreen).call(document);}catch(x){}}else ask();
-    });
-    function first(e){
-      document.removeEventListener('pointerup',first,true);
-      if(btn.contains(e.target)||cur())return;
-      ask();
-    }
-    document.addEventListener('pointerup',first,true);
-  })();
   $('aaGo').addEventListener('click',function(){
     if($('cfg').hidden)$('cfgBtn').click();
     $('cfg').scrollIntoView({behavior:'smooth',block:'center'});
@@ -1022,6 +1001,7 @@ details{display:grid;gap:12px}
     var mh=ev.target.closest('li.mh');
     if(mh){
       var mk=mh.dataset.mk,bm=ev.target.closest('button[data-act="delm"]');
+      if(ev.target.closest('button[data-act="medit"]')){setCvEdit(!$('cview').classList.contains('cedit'));render();return;}
       if(bm){
         var list=monthList(mk);if(!list.length)return;
         askConfirm('¿Borrar las '+list.length+(list.length===1?' compra':' compras')+' de '+mName(mk)+'?',resumen(list),'Sí, borrar el mes',function(){
