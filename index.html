@@ -185,6 +185,17 @@ select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .gbox .calc.soon{color:var(--amber)}
 .gbox .calc:empty{display:none}
 .pbox{display:grid;grid-template-columns:minmax(0,1fr);gap:4px}
+.accparts{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;grid-auto-flow:dense;min-width:0}
+.accparts>*{min-width:0}
+.accparts>.gtxt{margin-top:0;order:0}
+.accparts>.half{border-top:1px solid var(--line);padding-top:10px}
+.accparts>.first{border-top:0;padding-top:0}
+@container (min-width:400px){
+  .accparts{grid-template-columns:1fr 1fr;column-gap:16px}
+  .accparts>*{grid-column:1/-1}
+  .accparts>.half{grid-column:auto;border-top:0;padding-top:0}
+  .accparts>.half+.half{border-left:1px solid var(--line);padding-left:16px}
+}
 .ppart{display:grid;gap:4px;min-width:0;align-content:start}
 .pbox>.hdiv{order:0}
 @container (min-width:400px){
@@ -320,7 +331,7 @@ details{display:grid;gap:12px}
   </header>
 
   <section class="card editbar" id="editBar" hidden aria-label="Modo edición">
-    <p class="note"><b>Modo edición.</b> Arrastra la manilla de cada tarjeta o sección, o usa las flechas. El botón con el rectángulo cambia el tamaño de la tarjeta: chica, mediana o ancha. Toca un texto para cambiarlo. Los montos y los cálculos no se editan.</p>
+    <p class="note"><b>Modo edición.</b> Arrastra la manilla de cada tarjeta, sección o pieza (Total gastado, Puntos del año, Saldo, Puntos que faltan, objetivo, Beneficios vigentes…), o usa las flechas. El botón con el rectángulo cambia el tamaño de la tarjeta: chica, mediana o ancha. Toca un texto para cambiarlo. Los montos y los cálculos no se editan.</p>
     <div class="acts">
       <button type="button" class="mini" id="rstOrder">Restaurar orden y tamaños</button>
       <button type="button" class="mini" id="rstTx">Restaurar textos</button>
@@ -388,7 +399,7 @@ details{display:grid;gap:12px}
       <div class="sect">
         <div class="mishead"><p class="eyebrow" id="misTitle"><span data-tx="t-mis">Mis Fpuntos (1 Fpunto = $1)</span> <span class="tag" id="prov" hidden>con compra sin registrar</span></p><div class="seg vseg" id="vseg" role="group" aria-label="Ver costo en"><button type="button" data-v="g" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-2v18M12 9h8v12M7 9h2M7 13h2M7 17h2M15 13h2M15 17h2"/></svg>Falabella</button><button type="button" data-v="o" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/></svg>Otros</button></div></div>
         <div class="nums" id="cards">
-          <div class="n pts" id="c-acc" data-key="acc"><div class="ppart gpart"><div class="ghead"><span class="eyebrow" data-tx="t-gasto">Total gastado</span><button type="button" class="ico geye" id="gEye" aria-pressed="false" aria-label="Ocultar el monto gastado" title="Ocultar el monto gastado"><svg id="gEyeSvg" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/></svg></button></div><div class="fitbox" id="nGastoBox"><span class="big" id="nGasto"></span></div><div class="gtxt" id="gBox"><span class="wpill" id="gLine"></span></div></div><hr class="hdiv gdiv"><div class="pbox"><div class="ppart"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><hr class="hdiv"><div class="ppart"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div></div><div class="fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span><div class="falg" id="falg"></div></div><div class="gtxt"><span class="wpill" id="ptsInfo"></span></div><div class="bens"><span class="eyebrow" data-tx="t-ben">Beneficios vigentes</span><ul class="hitos" id="benef"></ul></div><div class="gbox"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div></div>
+          <div class="n pts" id="c-acc" data-key="acc"><div class="accparts list-mode" id="accParts"><div class="ppart gpart" data-key="p-gasto"><div class="ghead"><span class="eyebrow" data-tx="t-gasto">Total gastado</span><button type="button" class="ico geye" id="gEye" aria-pressed="false" aria-label="Ocultar el monto gastado" title="Ocultar el monto gastado"><svg id="gEyeSvg" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/></svg></button></div><div class="fitbox" id="nGastoBox"><span class="big" id="nGasto"></span></div><div class="gtxt" id="gBox"><span class="wpill" id="gLine"></span></div></div><div class="ppart half" data-key="p-acc"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><div class="ppart half" data-key="p-saldo"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div><div class="fal" data-key="p-fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span><div class="falg" id="falg"></div></div><div class="gtxt" data-key="p-obj"><span class="wpill" id="ptsInfo"></span></div><div class="bens" data-key="p-ben"><span class="eyebrow" data-tx="t-ben">Beneficios vigentes</span><ul class="hitos" id="benef"></ul></div><div class="gbox" data-key="p-saldotxt"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div></div></div>
           <div class="n regc" id="c-reg" data-key="reg" aria-label="Registrar una compra">
       <div class="reghead"><h3 data-tx="t-reg">Registrar una compra</h3><button type="button" class="mini hbtn lbtn" id="histBtn" aria-label="Abrir el historial de compras"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M5 6h.01M5 12h.01M5 18h.01"/></svg>Historial<span class="bdg" id="listCount" hidden></span></button></div>
       <div class="seg" role="group" aria-label="Dónde fue la compra" id="dondeSeg">
@@ -1252,7 +1263,8 @@ details{display:grid;gap:12px}
   /* Orden */
   var blocksEl=$('blocks'),cardsEl=$('cards');
   function keysOf(c){return [].map.call(c.children,function(x){return x.dataset.key;});}
-  var DEFORD={blocks:keysOf(blocksEl),cards:keysOf(cardsEl)};
+  var accEl=$('accParts');
+  var DEFORD={blocks:keysOf(blocksEl),cards:keysOf(cardsEl),acc:keysOf(accEl)};
   function applyOrder(c,keys){
     if(!Array.isArray(keys))return;
     keys.forEach(function(k){
@@ -1262,9 +1274,11 @@ details{display:grid;gap:12px}
   }
   if(S.order){
     if(Array.isArray(S.order.cards)&&S.order.cards.indexOf('reg')<0){var ix=S.order.cards.indexOf('saldo');S.order.cards.splice(ix<0?0:ix+1,0,'reg');}
-    applyOrder(blocksEl,S.order.blocks);applyOrder(cardsEl,S.order.cards);
+    applyOrder(blocksEl,S.order.blocks);applyOrder(cardsEl,S.order.cards);applyOrder(accEl,S.order.acc);
   }
-  function saveOrder(){S.order={blocks:keysOf(blocksEl),cards:keysOf(cardsEl)};save();}
+  function markFirst(){var k=[].filter.call(accEl.children,function(x){return x.dataset.key;});k.forEach(function(x,n){x.classList.toggle('first',n===0);});}
+  markFirst();
+  function saveOrder(){S.order={blocks:keysOf(blocksEl),cards:keysOf(cardsEl),acc:keysOf(accEl)};markFirst();save();}
   var SZNAME=['chica','mediana','ancha'],DEFSZ={reg:3,acc:3};
   function sizeIcon(n){return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="10" rx="2"/><rect x="4" y="9" width="'+[5,10,16][n-1]+'" height="6" rx="1" fill="currentColor" stroke="none"/></svg>';}
   function applySize(el){
@@ -1275,7 +1289,7 @@ details{display:grid;gap:12px}
     if(b){b.innerHTML=sizeIcon(n);var t='Tamaño: '+SZNAME[n-1]+'. Toca para cambiar';b.title=t;b.setAttribute('aria-label',t);}
   }
   $('rstOrder').addEventListener('click',function(){
-    applyOrder(blocksEl,DEFORD.blocks);applyOrder(cardsEl,DEFORD.cards);S.order=null;S.sizes={};
+    applyOrder(blocksEl,DEFORD.blocks);applyOrder(cardsEl,DEFORD.cards);applyOrder(accEl,DEFORD.acc);markFirst();S.order=null;S.sizes={};
     [].forEach.call(cardsEl.children,applySize);save();
   });
 
@@ -1328,6 +1342,7 @@ details{display:grid;gap:12px}
   }
   [].forEach.call(blocksEl.children,function(x){mover(x,blocksEl,false);});
   [].forEach.call(cardsEl.children,function(x){mover(x,cardsEl,true);applySize(x);});
+  [].forEach.call(accEl.children,function(x){mover(x,accEl,false);});
 
   /* Modo edición */
   var editing=false;
