@@ -107,6 +107,10 @@ input[type=text]:focus-visible,input[type=date]:focus-visible,button:focus-visib
 #nAcc{color:var(--pts-blue)}
 #nSaldo{color:var(--pts-red)}
 #nGasto{color:var(--gold)}
+.gtog{display:inline-flex;align-items:center;gap:6px;background:transparent;border:0;padding:4px 0;margin:0;color:inherit;font:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+.gtog .gchev{width:18px!important;height:18px!important;flex:none;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.gtog[aria-expanded="true"] .gchev{transform:rotate(180deg)}
+.gbody[hidden],#gEye[hidden]{display:none!important}
 .ghead{display:flex;align-items:center;justify-content:space-between;gap:8px}
 #gEye.geye,#gEye.geye[aria-pressed="true"]{width:34px;height:34px;margin:-6px -4px -6px 0;background:transparent;border:0;color:var(--muted)}
 button.geye svg{width:18px;height:18px}
@@ -399,7 +403,7 @@ details{display:grid;gap:12px}
       <div class="sect">
         <div class="mishead"><p class="eyebrow" id="misTitle"><span data-tx="t-mis">Mis Fpuntos (1 Fpunto = $1)</span> <span class="tag" id="prov" hidden>con compra sin registrar</span></p><div class="seg vseg" id="vseg" role="group" aria-label="Ver costo en"><button type="button" data-v="g" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-2v18M12 9h8v12M7 9h2M7 13h2M7 17h2M15 13h2M15 17h2"/></svg>Falabella</button><button type="button" data-v="o" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/></svg>Otros</button></div></div>
         <div class="nums" id="cards">
-          <div class="n pts" id="c-acc" data-key="acc"><div class="accparts list-mode" id="accParts"><div class="ppart gpart" data-key="p-gasto"><div class="ghead"><span class="eyebrow" data-tx="t-gasto">Total gastado</span><button type="button" class="ico geye" id="gEye" aria-pressed="false" aria-label="Ocultar el monto gastado" title="Ocultar el monto gastado"><svg id="gEyeSvg" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/></svg></button></div><div class="fitbox" id="nGastoBox"><span class="big" id="nGasto"></span></div><div class="gtxt" id="gBox"><span class="wpill" id="gLine"></span></div></div><div class="ppart half" data-key="p-acc"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><div class="ppart half" data-key="p-saldo"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div><div class="fal" data-key="p-fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span><div class="falg" id="falg"></div></div><div class="gtxt" data-key="p-obj"><span class="wpill" id="ptsInfo"></span></div><div class="bens" data-key="p-ben"><span class="eyebrow" data-tx="t-ben">Beneficios vigentes</span><ul class="hitos" id="benef"></ul></div><div class="gbox" data-key="p-saldotxt"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div></div></div>
+          <div class="n pts" id="c-acc" data-key="acc"><div class="accparts list-mode" id="accParts"><div class="ppart gpart" data-key="p-gasto"><div class="ghead"><button type="button" class="gtog" id="gTog" aria-expanded="false" aria-controls="gBody" aria-label="Mostrar u ocultar el total gastado"><span class="eyebrow" data-tx="t-gasto">Total gastado</span><svg class="gchev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg></button><button type="button" class="ico geye" id="gEye" hidden aria-pressed="false" aria-label="Ocultar el monto gastado" title="Ocultar el monto gastado"><svg id="gEyeSvg" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/></svg></button></div><div class="gbody" id="gBody" hidden><div class="fitbox" id="nGastoBox"><span class="big" id="nGasto"></span></div><div class="gtxt" id="gBox"><span class="wpill" id="gLine"></span></div></div></div><div class="ppart half" data-key="p-acc"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><div class="ppart half" data-key="p-saldo"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div><div class="fal" data-key="p-fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span><div class="falg" id="falg"></div></div><div class="gtxt" data-key="p-obj"><span class="wpill" id="ptsInfo"></span></div><div class="bens" data-key="p-ben"><span class="eyebrow" data-tx="t-ben">Beneficios vigentes</span><ul class="hitos" id="benef"></ul></div><div class="gbox" data-key="p-saldotxt"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div></div></div>
           <div class="n regc" id="c-reg" data-key="reg" aria-label="Registrar una compra">
       <div class="reghead"><h3 data-tx="t-reg">Registrar una compra</h3><button type="button" class="mini hbtn lbtn" id="histBtn" aria-label="Abrir el historial de compras"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M5 6h.01M5 12h.01M5 18h.01"/></svg>Historial<span class="bdg" id="listCount" hidden></span></button></div>
       <div class="seg" role="group" aria-label="Dónde fue la compra" id="dondeSeg">
@@ -956,6 +960,13 @@ details{display:grid;gap:12px}
     render();
   });
   $('gEye').addEventListener('click',function(){S.hideG=!S.hideG;render();});
+  S.hideG=true;
+  $('gTog').addEventListener('click',function(){
+    var open=$('gBody').hidden;
+    $('gBody').hidden=!open;$('gEye').hidden=!open;
+    this.setAttribute('aria-expanded',String(open));
+    S.hideG=true;render();
+  });
   $('aaGo').addEventListener('click',function(){
     if($('cfg').hidden)$('cfgBtn').click();
     $('cfg').scrollIntoView({behavior:'smooth',block:'center'});
