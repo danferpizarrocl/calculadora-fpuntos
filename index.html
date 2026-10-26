@@ -273,6 +273,9 @@ button.mini:disabled{opacity:.5;cursor:default}
 .ctools{display:flex;flex-wrap:wrap;gap:8px}
 .selc{width:22px;height:22px;margin:0 8px 0 0;vertical-align:middle;accent-color:var(--accent)}
 .selmode .row .acts{display:none}
+.cview:not(.cedit) .mh .msel{display:none}
+#compras li.row{touch-action:pan-y;position:relative}
+.cview.cedit:not(.selmode) #compras li.row{cursor:grab}
 select.dsel{width:auto;max-width:100%;font:600 13px var(--f-body);padding:4px 8px;border-radius:8px;margin-right:2px}
 select.dsel.dg{color:var(--accent)}
 select.dsel.do{color:var(--obj-red)}
@@ -512,7 +515,8 @@ details{display:grid;gap:12px}
   if(!S.seen)S.seen=Date.now();
   /* Sincronización entre dispositivos: la capacidad db de Claude guarda una copia privada del estado en tu cuenta (data/users/<id>/fpuntos).
      S._t = momento del último cambio real; gana la copia con _t más nuevo. Si db no está disponible, todo sigue en este dispositivo. */
-  var selMode=false,sel={},cfil='t';
+  var selMode=false,sel={},selMk=null,cfil='t';
+  function selOn(mk){return selMode||selMk===mk;}
   var sync={on:false,ready:false,doc:null,pushing:false,again:false,timer:null};
   function strip(j){var o=JSON.parse(j);delete o._t;delete o.monto;return JSON.stringify(o);}
   function snapJson(){var c=Object.assign({},S);delete c._t;delete c.monto;return JSON.stringify(c);}
@@ -881,21 +885,21 @@ details{display:grid;gap:12px}
           sub='<span class="t">Holding Falabella: '+mg.n+' · '+clp(mg.m)+' · '+fmt(mg.p)+' pts · Otros comercios: '+mo.n+' · '+clp(mo.m)+' · '+fmt(mo.p)+' pts</span>';
         }
         var op=mOpen(mk);
-        ch+='<li class="mh" data-mk="'+mk+'" role="button" tabindex="0" aria-expanded="'+op+'"><b>'+(selMode?'<input type="checkbox" class="selm" data-mk="'+mk+'" aria-label="Seleccionar todo el mes">':'')+'<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6l-6 6"/></svg>'+MESES[+mk.slice(5,7)-1]+' '+mk.slice(0,4)+'</b><span class="r">'+mt.n+(mt.n===1?' compra':' compras')+' · '+clp(mt.m)+' · '+fmt(mt.p)+' pts</span>'+sub+
+        ch+='<li class="mh" data-mk="'+mk+'" role="button" tabindex="0" aria-expanded="'+op+'"><b>'+(selOn(mk)?'<input type="checkbox" class="selm" data-mk="'+mk+'" aria-label="Seleccionar todo el mes">':'')+'<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6l-6 6"/></svg>'+MESES[+mk.slice(5,7)-1]+' '+mk.slice(0,4)+'</b><span class="r">'+mt.n+(mt.n===1?' compra':' compras')+' · '+clp(mt.m)+' · '+fmt(mt.p)+' pts</span>'+sub+
           '<button type="button" class="ico medit" data-act="medit" aria-pressed="'+cEd+'" aria-label="Editar la lista" title="Editar la lista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3l8 -8"/><path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9"/></svg></button>'+
-          '<span class="macts"><button type="button" class="mini dng" data-act="delm" data-mk="'+mk+'">Borrar mes</button></span></li>';
+          '<span class="macts"><button type="button" class="mini msel" data-act="msel" data-mk="'+mk+'" aria-pressed="'+(selMk===mk)+'">'+(selMk===mk?'Cancelar selección':'Seleccionar')+'</button>'+(selMk===mk?'<button type="button" class="mini dng" data-act="mdelsel" data-mk="'+mk+'"'+(ml.some(function(x){return sel[x.id];})?'':' disabled')+'>Borrar seleccionadas ('+ml.filter(function(x){return sel[x.id];}).length+')</button>':'')+'<button type="button" class="mini dng" data-act="delm" data-mk="'+mk+'">Borrar mes</button></span></li>';
       }
       if(!mOpen(mk))return;
       var f=c.fecha.split('-').reverse().join('-');
       var est=c.otro?'Otro año, no suma':(c.ab?'Abonada':'Por abonar');
       var btn='';/* "Marcar abonada" desactivado por ahora; la lógica sigue en data-act="ab" */
-      ch+='<li class="row'+(selMode&&sel[c.id]?' picked':'')+'" data-id="'+c.id+'"><b>'+(selMode?'<input type="checkbox" class="selc" data-id="'+c.id+'"'+(sel[c.id]?' checked':'')+' aria-label="Seleccionar compra">':'')+f+'</b><span class="t">'+(cEd&&!selMode?'<select class="dsel '+(c.donde==='g'?'dg':'do')+'" data-id="'+c.id+'" aria-label="Dónde fue la compra"><option value="g"'+(c.donde==='g'?' selected':'')+'>Holding Falabella</option><option value="o"'+(c.donde!=='g'?' selected':'')+'>Otros comercios</option></select>':(c.donde==='g'?'Holding':'Otros'))+' · '+clp(c.monto)+' · x'+c.m+(c.m2>c.m?'→x'+c.m2:'')+'</span>'+
+      ch+='<li class="row'+(selOn(mk)&&sel[c.id]?' picked':'')+'" data-id="'+c.id+'"><b>'+(selOn(mk)?'<input type="checkbox" class="selc" data-id="'+c.id+'"'+(sel[c.id]?' checked':'')+' aria-label="Seleccionar compra">':'')+f+'</b><span class="t">'+(cEd&&!selMode?'<select class="dsel '+(c.donde==='g'?'dg':'do')+'" data-id="'+c.id+'" aria-label="Dónde fue la compra"><option value="g"'+(c.donde==='g'?' selected':'')+'>Holding Falabella</option><option value="o"'+(c.donde!=='g'?' selected':'')+'>Otros comercios</option></select>':(c.donde==='g'?'Holding':'Otros'))+' · '+clp(c.monto)+' · x'+c.m+(c.m2>c.m?'→x'+c.m2:'')+'</span>'+
         '<span class="r">'+fmt(c.pts)+' pts<small>'+est+'</small></span>'+
-        '<span class="acts">'+btn+'<button type="button" class="mini" data-act="del" data-id="'+c.id+'">Borrar</button></span></li>';
+        (btn?'<span class="acts">'+btn+'</span>':'')+'</li>';
     });
     $('compras').innerHTML=ch||'<li class="note">'+(S.compras.length?'No hay compras en este comercio.':'Aún no registras compras.')+'</li>';
     Object.keys(sel).forEach(function(id){if(!cs.some(function(c){return String(c.id)===id;}))delete sel[id];});
-    if(!S.compras.length)selMode=false;
+    if(!S.compras.length){selMode=false;selMk=null;}
     var nSel=Object.keys(sel).length;
     $('ctools').hidden=!cs.length;
     $('cview').classList.toggle('selmode',selMode);
@@ -1032,6 +1036,18 @@ details{display:grid;gap:12px}
     if(mh){
       var mk=mh.dataset.mk,bm=ev.target.closest('button[data-act="delm"]');
       if(ev.target.closest('button[data-act="medit"]')){setCvEdit(!$('cview').classList.contains('cedit'));render();return;}
+      var bs=ev.target.closest('button[data-act="msel"]');
+      if(bs){selMk=(selMk===mk?null:mk);selMode=false;sel={};render();return;}
+      var bd=ev.target.closest('button[data-act="mdelsel"]');
+      if(bd){
+        var ls=monthList(mk).filter(function(c){return sel[c.id];});if(!ls.length)return;
+        var todas=ls.length>1&&ls.length===visible().length;
+        var hacer=function(){S.compras=S.compras.filter(function(c){return !sel[c.id];});sel={};selMk=null;render();};
+        askConfirm('¿Borrar '+(ls.length===1?'la compra seleccionada':'las '+ls.length+' compras seleccionadas')+' de '+mName(mk)+'?',resumen(ls),'Sí, borrar',function(){
+          if(todas)askMath(hacer,bd);else hacer();
+        },bd);
+        return;
+      }
       if(bm){
         var list=monthList(mk);if(!list.length)return;
         askConfirm('¿Borrar las '+list.length+(list.length===1?' compra':' compras')+' de '+mName(mk)+'?',resumen(list),'Sí, borrar el mes',function(){
@@ -1043,7 +1059,7 @@ details{display:grid;gap:12px}
       toggleMonth(mk);return;
     }
     var li=ev.target.closest('li.row');
-    if(selMode&&li&&!ev.target.closest('input.selc')&&!ev.target.closest('select')){var k=li.dataset.id;if(sel[k])delete sel[k];else sel[k]=true;render();return;}
+    if(li&&(selMode||selMk)&&!ev.target.closest('input.selc')&&!ev.target.closest('select')){var k=li.dataset.id;if(!selMode){var cc=S.compras.filter(function(x){return String(x.id)===k;})[0];if(!cc||String(cc.fecha).slice(0,7)!==selMk)return;}if(sel[k])delete sel[k];else sel[k]=true;render();return;}
     var b=ev.target.closest('button[data-act]');
     if(!b)return;
     var id=+b.dataset.id;
@@ -1051,6 +1067,44 @@ details{display:grid;gap:12px}
     S.compras.forEach(function(c){if(c.id===id)c.ab=!c.ab;});
     render();
   });
+  /* Deslizar una compra hacia la derecha, de un extremo al otro, para borrarla (solo en modo editar y sin selección) */
+  (function(){
+    var box=$('compras'),sw=null,swiped=false;
+    function reset(li){li.style.transition='transform .18s,background .18s';li.style.transform='';li.style.background='';setTimeout(function(){li.style.transition='';},220);}
+    box.addEventListener('pointerdown',function(e){
+      var li=e.target.closest('li.row');
+      if(!li||selMode||selMk||!$('cview').classList.contains('cedit')||$('cview').classList.contains('cpen'))return;
+      if(e.target.closest('input,select,button,[data-k]'))return;
+      if(e.pointerType==='mouse'&&e.button!==0)return;
+      sw={li:li,x:e.clientX,y:e.clientY,on:false,id:+li.dataset.id,w:li.getBoundingClientRect().width,pid:e.pointerId};
+    });
+    box.addEventListener('pointermove',function(e){
+      if(!sw||e.pointerId!==sw.pid)return;
+      var dx=e.clientX-sw.x,dy=e.clientY-sw.y;
+      if(!sw.on){
+        if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){sw=null;return;}
+        if(dx>10){sw.on=true;try{box.setPointerCapture(e.pointerId);}catch(x){}}
+        else return;
+      }
+      dx=Math.max(0,Math.min(dx,sw.w));
+      var k=dx/(sw.w*0.8);k=Math.min(1,k);
+      sw.li.style.transition='none';
+      sw.li.style.transform='translateX('+dx+'px)';
+      sw.li.style.background='rgba(200,50,50,'+(0.12+0.4*k)+')';
+      sw.go=dx>=sw.w*0.8;
+      e.preventDefault();
+    });
+    function fin(e){
+      if(!sw||e.pointerId!==sw.pid)return;
+      var s0=sw;sw=null;
+      if(!s0.on)return;
+      swiped=true;setTimeout(function(){swiped=false;},350);
+      reset(s0.li);
+      if(s0.go&&e.type==='pointerup')askDel(s0.id,null);
+    }
+    box.addEventListener('pointerup',fin);box.addEventListener('pointercancel',fin);
+    box.addEventListener('click',function(e){if(swiped){e.stopPropagation();e.preventDefault();}},true);
+  })();
   /* Ventana de confirmación para borrar una compra */
   var dlgFrom=null;
   function closeDlg(){$('dlg').hidden=true;document.removeEventListener('keydown',dlgKey);if(dlgFrom&&document.body.contains(dlgFrom))try{dlgFrom.focus();}catch(e){}dlgFrom=null;}
@@ -1072,7 +1126,7 @@ details{display:grid;gap:12px}
     var pts=list.reduce(function(a,c){return a+(c.otro?0:c.pts);},0),mt=list.reduce(function(a,c){return a+c.monto;},0);
     return list.length+(list.length===1?' compra':' compras')+' por '+clp(mt)+(pts?' ('+fmt(pts)+' puntos)':'')+'. Si las borras, dejan de sumar a tus totales. No se puede deshacer.';
   }
-  $('cSel').addEventListener('click',function(){selMode=!selMode;sel={};render();});
+  $('cSel').addEventListener('click',function(){selMode=!selMode;selMk=null;sel={};render();});
   $('cAll').addEventListener('click',function(){
     var vis=visible(),all=vis.length&&Object.keys(sel).length===vis.length;
     sel={};if(!all)vis.forEach(function(c){sel[c.id]=true;});render();
@@ -1177,7 +1231,7 @@ details{display:grid;gap:12px}
     $('cview').classList.toggle('cedit',on);
     $('cvEdit').setAttribute('aria-pressed',String(on));
     var t=on?'Terminar de seleccionar y borrar':'Seleccionar y borrar compras';$('cvEdit').setAttribute('aria-label',t);$('cvEdit').title=t;
-    if(!on){selMode=false;sel={};}
+    if(!on){selMode=false;selMk=null;sel={};}
   }
   $('cvEdit').addEventListener('click',function(){setCvEdit(!$('cview').classList.contains('cedit'));render();});
   function hideList(){
