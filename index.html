@@ -324,7 +324,15 @@ details{display:grid;gap:12px}
 .newyear h2,.newyear .note{color:var(--amber)}
 .foot{color:var(--muted);font-size:13px}
 .foot a{color:var(--accent)}
+.note.ver{text-align:center}
+.splash{position:fixed;inset:0;z-index:9999;background:#13221B;color:#F2F7F4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .4s ease}
+.splash.out{opacity:0;pointer-events:none}
+.splash .spIcon{width:116px;height:116px;border-radius:26px;display:block}
+.splash .spName{font:700 30px/1.1 Georgia,serif;letter-spacing:.01em;margin:6px 0 0}
+.splash .spVer{font:500 13px/1 system-ui,sans-serif;color:#9FB8AA;margin:0}
 </style>
+
+<div class="splash" id="splash" aria-hidden="true"><svg class="spIcon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><rect width="240" height="240" fill="#13221B"/><rect x="30" y="64" width="180" height="116" rx="18" fill="#0B7A52"/><rect x="30" y="88" width="180" height="22" fill="#08573A"/><rect x="48" y="142" width="38" height="9" rx="4" fill="#BFE6D2"/><text x="192" y="168" text-anchor="end" font-family="Georgia,serif" font-weight="700" font-size="58" fill="#F5C24B">FP</text></svg><p class="spName" id="spName">Fpuntos</p><p class="spVer" id="spVer"></p></div>
 
 <main class="wrap">
   <header class="head">
@@ -401,7 +409,7 @@ details{display:grid;gap:12px}
       <button type="button" class="ghost" id="reset">Volver a las cifras originales</button>
     </details>
     <p class="note" id="syncStat"></p>
-    <p class="note" style="text-align:center">Versión 3</p>
+    <p class="note ver" id="cfgVer"></p>
   </section>
 
   <div class="blocks list-mode" id="blocks">
@@ -484,6 +492,18 @@ details{display:grid;gap:12px}
 <div class="scrim" id="dlg" hidden><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgT"><h2 id="dlgT">¿Borrar esta compra?</h2><p id="dlgD"></p><div class="dlgb"><button type="button" id="dlgNo">Cancelar</button><button type="button" class="dng" id="dlgYes">Sí, borrar</button></div></div></div>
 
 <script>
+/* Identidad de la app: un solo lugar para el nombre y la versión (sube de a uno en cada cambio) */
+var APP_NAME='Fpuntos',APP_VERSION='3.1';
+(function(){
+  var sp=document.getElementById('splash');if(!sp)return;
+  document.getElementById('spName').textContent=APP_NAME;
+  document.getElementById('spVer').textContent='Versión '+APP_VERSION;
+  var cv=document.getElementById('cfgVer');if(cv)cv.textContent='Versión '+APP_VERSION;
+  var done=false;function hide(){if(done)return;done=true;sp.classList.add('out');setTimeout(function(){if(sp.parentNode)sp.parentNode.removeChild(sp);},600);}
+  window.addEventListener('load',function(){setTimeout(hide,900);});
+  setTimeout(hide,3500);
+})();
+
 (function(){
   /* BASE PARA SEGUIR MODIFICANDO
      Estado (S, guardado en localStorage con la clave KEY):
@@ -1413,7 +1433,7 @@ details{display:grid;gap:12px}
 })();
 </script>
 <script>
-if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js?v='+(typeof APP_VERSION!=='undefined'?APP_VERSION:'0')).catch(function(){})})}
 </script>
 
 </html>
