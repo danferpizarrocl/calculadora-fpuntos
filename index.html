@@ -289,6 +289,22 @@ select.dsel.do{color:var(--obj-red)}
 .cview:not(.cedit) .ctools,.cview:not(.cedit) button[data-act="del"]{display:none}
 .reghead{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .reghead h3{margin:0}
+.stitle{display:flex;align-items:center;gap:8px}
+.stitle .h3ico{width:20px;height:20px;flex:none;fill:none;stroke:var(--accent);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.stitle .ul{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
+.simlist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.simlist li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;background:var(--surface);border-radius:10px;padding:10px 12px}
+.simlist .sn{font-weight:600;font-size:14px}
+.simlist .sd{grid-column:1;font-size:13px;color:var(--muted)}
+.simlist .sp{grid-column:2;grid-row:1/3;text-align:right;font-weight:700}
+.simlist .sp small{display:block;font-weight:500;color:var(--muted)}
+.simlist button{grid-column:1/-1;justify-self:start}
+.simres{display:grid;gap:10px}
+.simres .goal{display:flex;justify-content:space-between;gap:10px;align-items:baseline;border-top:1px solid var(--line);padding-top:8px;font-size:14px}
+.simres .goal.ok b{color:var(--accent)}
+.simres .goal span:last-child{text-align:right;font-weight:600;white-space:nowrap}
+.num-tap{cursor:pointer}
+.updtag{display:block;margin-top:4px;font-size:12px;color:var(--muted)}
 button.hbtn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;font-size:14px}
 button.hbtn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .cvin .seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface)}
@@ -369,11 +385,11 @@ details{display:grid;gap:12px}
 
   <section class="card" id="cfg" aria-label="Configurar puntos iniciales" hidden>
     <h2><svg class="h2ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"/><circle cx="12" cy="12" r="3"/></svg> Configurar puntos iniciales</h2>
-    <p class="note">Copia estos números de la página web de Falabella. Las compras que registres se suman encima.</p>
+    <p class="note">Copia estos números de la página web de Falabella y actualízalos cada cierto tiempo. La app no suma compras: calcula tus metas con lo que pongas aquí.</p>
     <div class="field">
-      <label for="acc">Fpuntos acumulados en el año, según la página web (punto de inicio)</label>
+      <label for="acc">Fpuntos acumulados en el año, según la página web</label>
       <input id="acc" type="text" inputmode="numeric" autocomplete="off">
-      <small>Es tu punto de partida: la app cuenta desde este número. Es el acumulado del año calendario, desde el 1 de enero. Puedes cambiarlo cada vez que lo revises en la página.</small>
+      <small>Las metas y los puntos que te faltan se calculan con este número. Es el acumulado del año calendario, desde el 1 de enero. Cámbialo cada vez que lo revises en la página.</small>
     </div>
     <div class="field">
       <label for="saldo">Saldo disponible para canjear, según la página web (se va modificando)</label>
@@ -398,7 +414,7 @@ details{display:grid;gap:12px}
       <small>Sube solo al pasar los 180.000 y los 350.000. Si ya tienes x4 o x5 de otro año, márcalo.</small>
     </div>
     <div class="field">
-      <label for="gasto">Compras del año con la CMR, en pesos (opcional)</label>
+      <label for="gasto">Total gastado del año con la CMR, en pesos (opcional)</label>
       <div class="money"><span aria-hidden="true">$</span><input id="gasto" type="text" inputmode="numeric" autocomplete="off" placeholder="0"></div>
       <small>Sirve para ver el camino por gasto en el descuento de administración.</small>
     </div>
@@ -417,27 +433,23 @@ details{display:grid;gap:12px}
       <div class="sect">
         <div class="mishead"><p class="eyebrow" id="misTitle"><span data-tx="t-mis">Mis Fpuntos (1 Fpunto = $1)</span> <span class="tag" id="prov" hidden>con compra sin registrar</span></p><div class="seg vseg" id="vseg" role="group" aria-label="Ver costo en"><button type="button" data-v="g" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-2v18M12 9h8v12M7 9h2M7 13h2M7 17h2M15 13h2M15 17h2"/></svg>Falabella</button><button type="button" data-v="o" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/></svg>Otros</button></div></div>
         <div class="nums" id="cards">
-          <div class="n pts" id="c-acc" data-key="acc"><div class="accparts list-mode" id="accParts"><div class="ppart gpart" data-key="p-gasto"><div class="ghead"><button type="button" class="gtog" id="gTog" aria-expanded="false" aria-controls="gBody" aria-label="Mostrar u ocultar el total gastado"><span class="eyebrow" data-tx="t-gasto">Total gastado</span><svg class="gchev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg></button><button type="button" class="ico geye" id="gEye" hidden aria-pressed="false" aria-label="Ocultar el monto gastado" title="Ocultar el monto gastado"><svg id="gEyeSvg" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/></svg></button></div><div class="gbody" id="gBody" hidden><div class="fitbox" id="nGastoBox"><span class="big" id="nGasto"></span></div><div class="gtxt" id="gBox"><span class="wpill" id="gLine"></span></div></div></div><div class="ppart half" data-key="p-acc"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><div class="ppart half" data-key="p-saldo"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div><div class="gtxt aprox" data-key="p-aprox"><span class="wpill" data-tx="t-aprox">Valores aproximados. Revisa tus Fpuntos oficiales en la página o app de Falabella, porque pueden variar un poco por redondeo.</span></div><div class="fal" data-key="p-fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span><div class="falg" id="falg"></div></div><div class="gtxt" data-key="p-obj"><span class="wpill" id="ptsInfo"></span></div><div class="bens" data-key="p-ben"><span class="eyebrow" data-tx="t-ben">Beneficios vigentes</span><ul class="hitos" id="benef"></ul></div><div class="gbox" data-key="p-saldotxt"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div></div></div>
+          <div class="n pts" id="c-acc" data-key="acc"><div class="accparts list-mode" id="accParts"><div class="ppart gpart" data-key="p-gasto"><div class="ghead"><button type="button" class="gtog" id="gTog" aria-expanded="false" aria-controls="gBody" aria-label="Mostrar u ocultar el total gastado"><span class="eyebrow" data-tx="t-gasto">Total gastado</span><svg class="gchev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg></button><button type="button" class="ico geye" id="gEye" hidden aria-pressed="false" aria-label="Ocultar el monto gastado" title="Ocultar el monto gastado"><svg id="gEyeSvg" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/></svg></button></div><div class="gbody" id="gBody" hidden><div class="fitbox" id="nGastoBox"><span class="big" id="nGasto"></span></div><div class="gtxt" id="gBox"><span class="wpill" id="gLine"></span></div></div></div><div class="ppart half" data-key="p-acc"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><div class="ppart half" data-key="p-saldo"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div><div class="gtxt aprox" data-key="p-aprox"><span class="wpill" data-tx="t-aprox">Valores aproximados. Revisa tus Fpuntos oficiales en la página o app de Falabella, porque pueden variar un poco por redondeo.</span><span class="updtag" id="updTag"></span></div><div class="fal" data-key="p-fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span><div class="falg" id="falg"></div></div><div class="gtxt" data-key="p-obj"><span class="wpill" id="ptsInfo"></span></div><div class="bens" data-key="p-ben"><span class="eyebrow" data-tx="t-ben">Beneficios vigentes</span><ul class="hitos" id="benef"></ul></div><div class="gbox" data-key="p-saldotxt"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div></div></div>
           <div class="n regc" id="c-reg" data-key="reg" aria-label="Registrar una compra">
-      <div class="reghead"><h3 data-tx="t-reg">Registrar una compra</h3><button type="button" class="mini hbtn lbtn" id="histBtn" aria-label="Abrir el historial de compras"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M5 6h.01M5 12h.01M5 18h.01"/></svg>Historial<span class="bdg" id="listCount" hidden></span></button></div>
-      <div class="seg" role="group" aria-label="Dónde fue la compra" id="dondeSeg">
+      <div class="reghead"><h3 class="stitle"><svg class="h3ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><rect x="8" y="7" width="8" height="3"/><path d="M8 14v.01M12 14v.01M16 14v.01M8 17v.01M12 17v.01M16 17v.01"/></svg><span class="ul" data-tx="t-sim">Simular una compra</span></h3><span hidden><button type="button" id="histBtn" tabindex="-1"></button><span id="listCount"></span></span></div>
+      <p class="note">Solo para ver cómo cambiarían tus metas. No se guarda y no cambia tus números reales.</p>
+      <div class="seg" role="group" aria-label="Dónde sería la compra" id="dondeSeg">
         <button type="button" data-d="g">Holding Falabella</button>
         <button type="button" data-d="o">Otros comercios</button>
       </div>
-      <div class="grid2">
-        <div class="field">
-          <label for="fecha">Fecha</label>
-          <input id="fecha" type="date">
-        </div>
-        <div class="field">
-          <label for="monto">Monto, en pesos</label>
-          <div class="money"><span aria-hidden="true">$</span><input id="monto" type="text" inputmode="numeric" autocomplete="off" placeholder="0"></div>
-        </div>
+      <div class="field">
+        <label for="monto">Monto de la compra, en pesos</label>
+        <div class="money"><span aria-hidden="true">$</span><input id="monto" type="text" inputmode="numeric" autocomplete="off" placeholder="0"></div>
       </div>
-      <div class="pair" id="conv"></div>
-      <p class="note" id="convNote"></p>
-      <p class="warn" id="otroWarn" hidden></p>
-      <button type="button" class="primary" id="reg">Registrar compra con la CMR</button>
+      <p class="note" id="simPrev"></p>
+      <button type="button" class="primary" id="reg">Agregar a la simulación</button>
+      <ul class="simlist" id="simList"></ul>
+      <div class="simres" id="simRes"></div>
+      <button type="button" class="ghost" id="simClear" hidden>Limpiar simulación</button>
     </div>
         </div>
         <div class="ladder" id="ladder"></div>
@@ -493,7 +505,7 @@ details{display:grid;gap:12px}
 
 <script>
 /* Identidad de la app: un solo lugar para el nombre y la versión (sube de a uno en cada cambio) */
-var APP_NAME='Fpuntos',APP_VERSION='3.1';
+var APP_NAME='Fpuntos',APP_VERSION='3.2';
 (function(){
   var sp=document.getElementById('splash');if(!sp)return;
   document.getElementById('spName').textContent=APP_NAME;
@@ -657,7 +669,18 @@ var APP_NAME='Fpuntos',APP_VERSION='3.1';
     function cn(n){return n+(n===1?' compra':' compras');}
     return st('Compras registradas',all.n,'en total','c-s1')+st('Total gastado',clp(all.m),fmt(all.p)+' puntos totales','c-s2')+st('Holding Falabella',cn(g.n),clp(g.m)+' · '+fmt(g.p)+' pts','c-s3')+st('Otros comercios',cn(o.n),clp(o.m)+' · '+fmt(o.p)+' pts','c-s4');
   }
-  function pend(){return S.compras.filter(function(c){return !c.ab&&!c.otro;});}
+  /* Las compras registradas antes ya no suman: los números los pones tú desde la página de Falabella. */
+  function pend(){return [];}
+  var SIM=[];
+  function simRun(){
+    var base=S.acc||0,items=[],gm=0;
+    SIM.forEach(function(it){
+      var tramo=it.donde==='g'?S.set.tramoG:S.set.tramoO,tr=Math.floor(it.monto/tramo);
+      var m=mAt(base,S.mult,true),pts=ptsCompra(base,tr),m2=mAt(base+pts,S.mult,true);
+      items.push({monto:it.monto,donde:it.donde,pts:pts,m:m,m2:m2});base+=pts;gm+=it.monto;
+    });
+    return {items:items,base:base,gm:gm};
+  }
   function sumP(k){return pend().reduce(function(s,c){return s+c[k];},0);}
 
   function mAt(q,base,strict){
@@ -701,9 +724,9 @@ var APP_NAME='Fpuntos',APP_VERSION='3.1';
   }
   function draft(){
     var monto=S.monto||0;
-    var f=$('fecha').value||today();
+    var f=today();
     var tramo=S.donde==='g'?S.set.tramoG:S.set.tramoO;
-    var base=(S.acc||0)+sumP('pts');
+    var base=simRun().base;
     var m=mAt(base,S.mult,true);
     var tramos=Math.floor(monto/tramo);
     var pts=ptsCompra(base,tramos);
@@ -749,10 +772,10 @@ var APP_NAME='Fpuntos',APP_VERSION='3.1';
     var gy=S.gasto==null?null:S.gasto+sumP('monto');
     var disc=discLevel(acc,gy),y=Number(S.year);
     var earned=acc>S.set.h350?5:acc>S.set.h180?4:3;
-    S.hist.unshift({year:S.year,acc:acc,gasto:gy,mult:S.mult,earned:earned,disc:disc,compras:S.compras.length});
+    S.hist.unshift({year:S.year,acc:acc,gasto:gy,mult:S.mult,earned:earned,disc:disc,compras:0});
     S.carry={year:S.year,mult:earned>=4?earned:3,multHasta:earned>=4?(y+1)+'-12-31':null,disc:disc,discHasta:disc?(y+1)+'-12-31':null};
     S.saldo=(S.saldo==null&&!pend().length)?null:(S.saldo||0)+pp;
-    S.acc=0;S.gasto=null;S.compras=[];
+    S.acc=0;S.gasto=null;S.accT=null;S.gastoT=null;SIM.length=0;
     S.mult=earned>=4?earned:3;
     S.year=YEAR;S.needAcc=true;
   }
@@ -760,7 +783,7 @@ var APP_NAME='Fpuntos',APP_VERSION='3.1';
   function render(){
     var d=draft();
     var ny=S.year!==YEAR;
-    var counts=d.active&&!d.otro;
+    var counts=false;
     var np=pend().length;
     var pp=sumP('pts');
     var acc=(S.acc||0)+pp+(counts?d.pts:0);
@@ -774,7 +797,7 @@ var APP_NAME='Fpuntos',APP_VERSION='3.1';
     /* Totales */
     $('prov').hidden=!counts;
     $('nAcc').textContent=fmt(acc);
-    var gT=(S.gasto||0)+tot(S.compras).m+(counts?d.monto:0);
+    var gT=(S.gasto||0);
     var hG=!!S.hideG,mG=function(v){return hG?'$•••••':clp(v);};
     $('nGasto').textContent=hG?'$•••••••':clp(gT);
     $('gEye').setAttribute('aria-pressed',String(hG));
@@ -786,7 +809,13 @@ var APP_NAME='Fpuntos',APP_VERSION='3.1';
       gT>=S.set.g50?'Tu próximo objetivo es la administración en $0: te faltan '+mG(S.set.g100-gT)+'.':
       'Tu próximo objetivo es el 50% de descuento en administración: te faltan '+mG(S.set.g50-gT)+'.';
     fitAcc();
-    $('startNote').textContent='Los puntos del año parten desde la cantidad de '+fmt(S.acc||0)+', registrada en Configuración, que corresponde a lo que figura en la app de Falabella. A ese valor se le suman las compras que registres aquí. Si necesitas corregirlo, puedes modificarlo cuando quieras desde el engranaje.';
+    (function(){
+      var a=S.accT,b=S.saldoT,t='';
+      if(a&&b&&a===b)t='Actualizado el '+dmy(a);
+      else{var q=[];if(a)q.push('puntos el '+dmy(a));if(b)q.push('saldo el '+dmy(b));if(q.length)t='Actualizado: '+q.join(' · ');}
+      $('updTag').textContent=t||'Toca Puntos del año o Saldo disponible para actualizarlos.';
+    })();
+    $('startNote').textContent='Los puntos del año son los '+fmt(S.acc||0)+' que tienes anotados en Configuración, tomados de la app o la página de Falabella. La app no suma compras: cuando quieras actualizarlos, toca el número o el engranaje. Para ver qué pasaría con una compra, usa la simulación.';
     var sBase=(S.saldo==null&&!np)?null:(S.saldo||0)+pp;
     var sTot=(sBase==null&&!counts)?null:(sBase||0)+(counts?d.pts:0);
     $('nSaldo').textContent=sTot==null?'—':fmt(sTot);
@@ -810,20 +839,44 @@ var APP_NAME='Fpuntos',APP_VERSION='3.1';
     }).join('');
     $('ladderNote').textContent='Con x'+m+', cada Fpunto te cuesta '+clp(S.set.tramoG/m)+' en el holding Falabella y '+clp(S.set.tramoO/m)+' en otros comercios.';
 
-    /* Formulario */
-    if(d.active){
-      $('conv').innerHTML=
-        '<div class="stat"><span class="eyebrow">Por tramo cerrado</span><span class="v">'+fmt(d.pts)+' pts</span></div>'+
-        '<div class="stat"><span class="eyebrow">Exacto</span><span class="v">'+d.exact.toLocaleString('es-CL',{maximumFractionDigits:2})+' pts</span></div>';
-      $('convNote').textContent=d.tramos+' tramos de '+clp(d.tramo)+' × x'+d.m+(d.m2>d.m?' (pasas a x'+d.m2+' en el camino)':'')+'. Retorno de '+(d.pts/d.monto*100).toLocaleString('es-CL',{maximumFractionDigits:2})+'% en pesos al canjear. Compara con la app oficial para ver cuál de los dos calza. Solo para compras pagadas con la CMR.';
-    }else{
-      $('conv').innerHTML='<div class="stat"><span class="eyebrow">Por tramo cerrado</span><span class="v">—</span></div><div class="stat"><span class="eyebrow">Exacto</span><span class="v">—</span></div>';
-      $('convNote').textContent='Escribe el monto y mira cómo se mueven tus totales y los hitos.';
-    }
-    $('otroWarn').hidden=!(d.active&&d.otro);
-    $('otroWarn').textContent='Esta fecha es de otro año. Se guarda en el registro, pero no suma a tus puntos de '+YEAR+'.';
-    $('reg').disabled=!d.active||ny;
-    if(ny)$('convNote').textContent='Cierra '+S.year+' arriba antes de registrar compras de '+YEAR+'.';
+    /* Simulación de compra: no se guarda ni toca los números reales */
+    (function(){
+      var sr=simRun(),items=sr.items.slice();
+      if(d.active)items.push({monto:d.monto,donde:S.donde,pts:d.pts,m:d.m,m2:d.m2,draft:true});
+      var DN={g:'Holding Falabella',o:'Otros comercios'};
+      $('simList').innerHTML=sr.items.map(function(it,n){
+        return '<li><span class="sn">Compra '+(n+1)+' · '+DN[it.donde==='g'?'g':'o']+'</span><span class="sd">'+clp(it.monto)+'</span><span class="sp">+'+fmt(it.pts)+' pts<small>x'+it.m+(it.m2>it.m?' → x'+it.m2:'')+'</small></span><button type="button" class="mini" data-i="'+n+'">Quitar</button></li>';
+      }).join('');
+      $('simClear').hidden=!SIM.length;
+      $('reg').disabled=!d.active||ny;
+      $('simPrev').textContent=ny?'Cierra '+S.year+' arriba antes de simular compras de '+YEAR+'.':d.active?
+        'Esta compra daría unos '+fmt(d.pts)+' pts ('+d.tramos+' tramos de '+clp(d.tramo)+' × x'+d.m+(d.m2>d.m?', pasas a x'+d.m2+' en el camino':'')+'). Toca "Agregar" para sumarla a la simulación.':
+        'Escribe el monto y mira cómo quedarían tus metas.';
+      var out=$('simRes');
+      if(!items.length){out.innerHTML='';return;}
+      var sPts=items.reduce(function(a,i){return a+i.pts;},0),sMon=items.reduce(function(a,i){return a+i.monto;},0);
+      var acc2=acc+sPts,gy2=(S.gasto||0)+sMon;
+      function whyP(h,a,g){
+        if(a>h.val)return true;
+        if(h.k==='x4'&&S.mult>=4)return true;
+        if(h.k==='x5'&&S.mult>=5)return true;
+        if(h.spend&&g>h.spend)return true;
+        return false;
+      }
+      var gm=S.hideG?'$•••••':clp(gy2);
+      var html='<div class="pair"><div class="stat"><span class="eyebrow">Puntos que sumarías</span><span class="v">'+fmt(sPts)+' pts</span></div><div class="stat"><span class="eyebrow">Quedarías con</span><span class="v">'+fmt(acc2)+' pts</span></div></div>';
+      html+=H.map(function(h){
+        var now=whyP(h,acc,(S.gasto||0)),sm=whyP(h,acc2,gy2),r;
+        if(now)r='<span>Ya cumplida</span>';
+        else if(sm)r='<span>Se cumpliría</span>';
+        else r='<span>Te faltarían '+fmt(h.val+1-acc2)+' pts</span>';
+        return '<div class="goal'+((now||sm)?' ok':'')+'"><span><b>'+h.t+'</b></span>'+r+'</div>';
+      }).join('');
+      var m2=mAt(acc2,S.mult,true);
+      if(m2>m)html+='<p class="note">Con esta simulación pasarías a x'+m2+'.</p>';
+      html+='<p class="note">Simulación aproximada. Total gastado con la simulación: '+gm+'.</p>';
+      out.innerHTML=html;
+    })();
 
     /* Hitos: tarjetas de arriba, se actualizan con cada monto que escribes */
     function why(h){
@@ -868,7 +921,7 @@ var APP_NAME='Fpuntos',APP_VERSION='3.1';
     $('gBox').hidden=!nxt&&gT>=S.set.g100;
     $('ptsInfo').textContent=nxt?'Tu próximo objetivo es '+NOM[nxt.k]+': te faltan '+fmt(nxt.val+1-acc)+' puntos.':'Ya cumpliste todos los objetivos de este año.';
     $('hitsNote').textContent=(nxt?'El borde marca tu próximo objetivo. ':'No queda ningún corte por alcanzar este año. ')+
-      'El gasto incluye el paso a x4 y x5 en el camino.'+(counts?' Incluye la compra que estás escribiendo, aún sin registrar.':'');
+      'El gasto incluye el paso a x4 y x5 en el camino.';
 
     /* Nuevo año, beneficios e historial */
     var accNow=(S.acc||0)+pp;
@@ -881,7 +934,7 @@ var APP_NAME='Fpuntos',APP_VERSION='3.1';
     }
     if(ny){
       $('nyTitle').textContent='Empezó '+YEAR;
-      $('nyText').textContent='Voy a cerrar '+S.year+' con '+fmt(accNow)+' Fpuntos y guardarlo en "Años cerrados". Tus compras pasan al historial y tu acumulado de '+YEAR+' queda en 0, para que pongas el número de la app en Configurar. Los beneficios que ganaste quedan en "Beneficios vigentes". Tu saldo se mantiene.';
+      $('nyText').textContent='Voy a cerrar '+S.year+' con '+fmt(accNow)+' Fpuntos y guardarlo en "Años cerrados". Tu acumulado de '+YEAR+' queda en 0, para que pongas el número de la app en Configurar. Los beneficios que ganaste quedan en "Beneficios vigentes". Tu saldo se mantiene.';
       $('nyBtn').textContent='Cerrar '+S.year+' y empezar '+YEAR;
     }
     $('benef').innerHTML=benefits(acc,gy).map(function(b){
@@ -891,7 +944,7 @@ var APP_NAME='Fpuntos',APP_VERSION='3.1';
     $('histBox').hidden=!S.hist.length;
     $('hist').innerHTML=S.hist.map(function(h){
       return '<li class="row"><b>'+h.year+'</b><span class="t">'+fmt(h.acc)+' Fpuntos · x'+h.mult+(h.earned>h.mult?', ganaste x'+h.earned:'')+'</span>'+
-        '<span class="r">'+(h.disc===100?'Adm. $0':h.disc===50?'Adm. 50%':'Sin descuento')+'<small>'+h.compras+' compras</small></span></li>';
+        '<span class="r">'+(h.disc===100?'Adm. $0':h.disc===50?'Adm. 50%':'Sin descuento')+(h.compras?'<small>'+h.compras+' compras</small>':'')+'</span></li>';
     }).join('');
 
     /* Compras registradas */
@@ -963,17 +1016,15 @@ var APP_NAME='Fpuntos',APP_VERSION='3.1';
   }
   function bind(id,key){
     var el=$(id);
-    el.addEventListener('input',function(){liveFmt(el);S[key]=num(el.value);if(key==='acc')S.needAcc=false;render();});
+    el.addEventListener('input',function(){liveFmt(el);S[key]=num(el.value);if(key==='acc')S.needAcc=false;if(key==='acc'||key==='saldo'||key==='gasto')S[key+'T']=today();render();});
     el.addEventListener('blur',function(){if(S[key]!=null)el.value=fmt(S[key]);});
     if(S[key]!=null)el.value=fmt(S[key]);
   }
   bind('acc','acc');
   bind('saldo','saldo');
   bind('gasto','gasto');
+  S.monto=null;
   bind('monto','monto');
-  $('fecha').value=today();
-  $('fecha').addEventListener('input',render);
-  $('fecha').addEventListener('change',render);
 
   $('venceMes').value=String(S.vence.mes||1);
   $('venceAnio').value=S.vence.anio||'';
@@ -1012,18 +1063,27 @@ var APP_NAME='Fpuntos',APP_VERSION='3.1';
   $('reg').addEventListener('click',function(){
     var d=draft();
     if(!d.active||S.year!==YEAR)return;
-    function agregar(){
-      S.compras.push({id:Date.now(),fecha:d.fecha,monto:d.monto,donde:S.donde,m:d.m,m2:d.m2,pts:d.pts,ab:false,otro:d.otro});
-      S.mopen[d.fecha.slice(0,7)]=true;
-      S.monto=null;$('monto').value='';$('fecha').value=today();
-      render();
-    }
-    var mkNow=today().slice(0,7);
-    if(d.fecha.slice(0,7)!==mkNow){
-      askConfirm('La fecha no corresponde al mes en curso','Estamos en '+mName(mkNow)+' y la compra tiene fecha del '+dmy(d.fecha)+' ('+mName(d.fecha.slice(0,7))+'). ¿La quieres agregar igualmente con esa fecha?','Sí, agregar',agregar,$('reg'));
-      return;
-    }
-    agregar();
+    SIM.push({monto:d.monto,donde:S.donde});
+    S.monto=null;$('monto').value='';
+    render();
+  });
+  $('simClear').addEventListener('click',function(){SIM.length=0;render();});
+  $('simList').addEventListener('click',function(ev){
+    var b=ev.target.closest('button[data-i]');if(!b)return;
+    SIM.splice(+b.dataset.i,1);render();
+  });
+  /* Tocar los números principales abre Configurar para actualizarlos */
+  function goCfg(id){
+    if(document.body.classList.contains('editing'))return;
+    if($('cfg').hidden)$('cfgBtn').click();
+    $('cfg').scrollIntoView({behavior:'smooth',block:'center'});
+    try{$(id).focus();$(id).select();}catch(e){}
+  }
+  [['nAcc','acc'],['nSaldo','saldo']].forEach(function(p){
+    var el=$(p[0]);el.classList.add('num-tap');el.setAttribute('role','button');el.setAttribute('tabindex','0');
+    el.setAttribute('aria-label','Actualizar este número');
+    el.addEventListener('click',function(){goCfg(p[1]);});
+    el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();goCfg(p[1]);}});
   });
   [].forEach.call(document.querySelectorAll('#vseg button'),function(b){b.addEventListener('click',function(){S.vista=b.dataset.v;render();});});
   /* Corregir dónde se hizo una compra: se recalculan sus puntos y los de las compras pendientes que vienen después */
