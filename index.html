@@ -433,7 +433,7 @@ details{display:grid;gap:12px}
       <div class="sect">
         <div class="mishead"><p class="eyebrow" id="misTitle"><span data-tx="t-mis">Mis Fpuntos (1 Fpunto = $1)</span> <span class="tag" id="prov" hidden>con compra sin registrar</span></p><div class="seg vseg" id="vseg" role="group" aria-label="Ver costo en"><button type="button" data-v="g" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-2v18M12 9h8v12M7 9h2M7 13h2M7 17h2M15 13h2M15 17h2"/></svg>Falabella</button><button type="button" data-v="o" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/></svg>Otros</button></div></div>
         <div class="nums" id="cards">
-          <div class="n pts" id="c-acc" data-key="acc"><div class="accparts list-mode" id="accParts"><div class="ppart gpart" data-key="p-gasto"><div class="ghead"><button type="button" class="gtog" id="gTog" aria-expanded="false" aria-controls="gBody" aria-label="Mostrar u ocultar el total gastado"><span class="eyebrow" data-tx="t-gasto">Total gastado</span><svg class="gchev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg></button><button type="button" class="ico geye" id="gEye" hidden aria-pressed="false" aria-label="Ocultar el monto gastado" title="Ocultar el monto gastado"><svg id="gEyeSvg" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/></svg></button></div><div class="gbody" id="gBody" hidden><div class="fitbox" id="nGastoBox"><span class="big" id="nGasto"></span></div><div class="gtxt" id="gBox"><span class="wpill" id="gLine"></span></div></div></div><div class="ppart half" data-key="p-acc"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><div class="ppart half" data-key="p-saldo"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div><div class="gtxt aprox" data-key="p-aprox"><span class="wpill" data-tx="t-aprox">Valores aproximados. Revisa tus Fpuntos oficiales en la página o app de Falabella, porque pueden variar un poco por redondeo.</span><span class="updtag" id="updTag"></span></div><div class="fal" data-key="p-fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span><div class="falg" id="falg"></div></div><div class="gtxt" data-key="p-obj"><span class="wpill" id="ptsInfo"></span></div><div class="bens" data-key="p-ben"><span class="eyebrow" data-tx="t-ben">Beneficios vigentes</span><ul class="hitos" id="benef"></ul></div><div class="gbox" data-key="p-saldotxt"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div></div></div>
+          <div class="n pts" id="c-acc" data-key="acc"><div class="accparts list-mode" id="accParts"><div class="ppart gpart" data-key="p-gasto"><div class="ghead"><button type="button" class="gtog" id="gTog" aria-expanded="false" aria-controls="gBody" aria-label="Mostrar u ocultar el total gastado"><span class="eyebrow" data-tx="t-gasto">Total gastado</span><svg class="gchev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg></button><button type="button" class="ico geye" id="gEye" hidden aria-pressed="false" aria-label="Ocultar el monto gastado" title="Ocultar el monto gastado"><svg id="gEyeSvg" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/></svg></button></div><div class="gbody" id="gBody" hidden><div class="fitbox" id="nGastoBox"><span class="big" id="nGasto"></span></div><div class="gtxt" id="gBox"><span class="wpill" id="gLine"></span></div></div></div><div class="ppart half" data-key="p-acc"><span class="eyebrow" data-tx="t-acc">Puntos del año</span><div class="fitbox" id="nAccBox"><span class="big" id="nAcc"></span></div></div><div class="ppart half" data-key="p-saldo"><span class="eyebrow" data-tx="t-saldo">Saldo disponible (Fpuntos)</span><div class="fitbox" id="nSaldoBox"><span class="big" id="nSaldo"></span></div></div><div class="gtxt aprox" data-key="p-aprox"><span class="wpill" data-tx="t-aprox">Valores aproximados. Revisa tus Fpuntos oficiales en la página o app de Falabella, porque pueden variar un poco por redondeo.</span><span class="updtag" id="updTag"></span></div><div class="fal" data-key="p-fal"><span class="eyebrow" data-tx="t-fal">Puntos que faltan</span> <span class="tag" id="falTag" hidden>con simulación</span><div class="falg" id="falg"></div></div><div class="gtxt" data-key="p-obj"><span class="wpill" id="ptsInfo"></span></div><div class="bens" data-key="p-ben"><span class="eyebrow" data-tx="t-ben">Beneficios vigentes</span><ul class="hitos" id="benef"></ul></div><div class="gbox" data-key="p-saldotxt"><span class="calc" id="nSaldoCalc"></span><span class="calc" id="nSaldoVence"></span></div></div></div>
           <div class="n regc" id="c-reg" data-key="reg" aria-label="Registrar una compra">
       <div class="reghead"><h3 class="stitle"><svg class="h3ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><rect x="8" y="7" width="8" height="3"/><path d="M8 14v.01M12 14v.01M16 14v.01M8 17v.01M12 17v.01M16 17v.01"/></svg><span class="ul" data-tx="t-sim">Simular una compra</span></h3><span hidden><button type="button" id="histBtn" tabindex="-1"></button><span id="listCount"></span></span></div>
       <p class="note">Solo para ver cómo cambiarían tus metas. No se guarda y no cambia tus números reales.</p>
@@ -505,7 +505,7 @@ details{display:grid;gap:12px}
 
 <script>
 /* Identidad de la app: un solo lugar para el nombre y la versión (sube de a uno en cada cambio) */
-var APP_NAME='Fpuntos',APP_VERSION='3.2';
+var APP_NAME='Fpuntos',APP_VERSION='3.3';
 (function(){
   var sp=document.getElementById('splash');if(!sp)return;
   document.getElementById('spName').textContent=APP_NAME;
@@ -887,6 +887,20 @@ var APP_NAME='Fpuntos',APP_VERSION='3.2';
       return '';
     }
     var nxt=H.find(function(h){return !why(h);});
+    /* Con una compra en la simulación (o escribiéndose), las fichas de "Puntos que faltan" se calculan como si ya estuviera hecha */
+    var sr0=simRun(),sOn=d.active&&!ny;
+    var simP=sr0.items.reduce(function(a,i){return a+i.pts;},0)+(sOn?d.pts:0);
+    var simM=sr0.gm+(sOn?d.monto:0);
+    var simOn=simP>0||simM>0;
+    var accV=acc+simP,gyV=(gy==null&&!simM)?null:(gy||0)+simM;
+    function whyV(h){
+      var r=why(h);if(r)return r;
+      if(!simOn)return '';
+      if(accV>h.val||(h.spend&&gyV!=null&&gyV>h.spend))return 'Se cumpliría';
+      return '';
+    }
+    var nxtV=H.find(function(h){return !whyV(h);});
+    $('falTag').hidden=!simOn;
     var byK={};H.forEach(function(h){byK[h.k]=h;});
     /* Notas de los objetivos, al final de la página: cambian solas con tus puntos, tu gasto y la fecha */
     var NN={a50:'50% de descuento en administración',a100:'100% de descuento: administración gratis',x4:'Multiplicador por 4',x5:'Multiplicador por 5'};
@@ -907,19 +921,19 @@ var APP_NAME='Fpuntos',APP_VERSION='3.2';
     /* Puntos que faltan: sección de la tarjeta principal, se actualiza con cada monto */
     var FAL=[['a50','50% de descuento'],['a100','100% de descuento'],['x4','Multiplicador por 4'],['x5','Multiplicador por 5']];
     /* Ordenadas por cercanía: primero las cumplidas (les faltan 0) y luego las que piden menos puntos */
-    function falta(k){var h=byK[k];return why(h)?0:h.val+1-acc;}
+    function falta(k){var h=byK[k];return whyV(h)?0:h.val+1-accV;}
     FAL.sort(function(a,b){return falta(a[0])-falta(b[0])||byK[a[0]].val-byK[b[0]].val;});
     $('falg').innerHTML=FAL.map(function(f){
-      var h=byK[f[0]],w=why(h);
-      var costo=w?'':clp(gastoPara(acc,h.val+1,S.vista==='o'?S.set.tramoO:S.set.tramoG));
-      return '<div class="ft'+(w?' ok':'')+(nxt&&nxt.k===f[0]?' next':'')+'"><span class="fl">'+f[1]+'</span>'+(w?'<span class="pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>'+w+'</span>':'<div class="fb"><span class="fn">'+fmt(h.val+1-acc)+'<small>Pts</small></span><span class="fc"><small>Por gastar</small>'+costo+'</span></div>')+'</div>';
+      var h=byK[f[0]],w=whyV(h);
+      var costo=w?'':clp(gastoPara(accV,h.val+1,S.vista==='o'?S.set.tramoO:S.set.tramoG));
+      return '<div class="ft'+(w?' ok':'')+(nxtV&&nxtV.k===f[0]?' next':'')+'"><span class="fl">'+f[1]+'</span>'+(w?'<span class="pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>'+w+'</span>':'<div class="fb"><span class="fn">'+fmt(h.val+1-accV)+'<small>Pts</small></span><span class="fc"><small>Por gastar</small>'+costo+'</span></div>')+'</div>';
     }).join('');
     [].forEach.call(document.querySelectorAll('#vseg button'),function(b){b.setAttribute('aria-pressed',String(b.dataset.v===(S.vista==='o'?'o':'g')));});
     $('xInfoNote').textContent='El x4 se activa sobre '+fmt(S.set.h180)+' puntos y rige hasta fin del año siguiente. El x5 se activa sobre '+fmt(S.set.h350)+' puntos; su duración está por confirmar con Falabella.';
     var NOM={a50:'el 50% de descuento en administración',x4:'el x4',a100:'la administración gratis',x5:'el x5'};
-    $('ptsInfo').classList.toggle('done',!nxt);
+    $('ptsInfo').classList.toggle('done',!nxtV);
     $('gBox').hidden=!nxt&&gT>=S.set.g100;
-    $('ptsInfo').textContent=nxt?'Tu próximo objetivo es '+NOM[nxt.k]+': te faltan '+fmt(nxt.val+1-acc)+' puntos.':'Ya cumpliste todos los objetivos de este año.';
+    $('ptsInfo').textContent=nxtV?'Tu próximo objetivo es '+NOM[nxtV.k]+': te faltan '+fmt(nxtV.val+1-accV)+' puntos'+(simOn?', con la simulación':'')+'.':'Ya cumpliste todos los objetivos de este año'+(simOn?', con la simulación':'')+'.';
     $('hitsNote').textContent=(nxt?'El borde marca tu próximo objetivo. ':'No queda ningún corte por alcanzar este año. ')+
       'El gasto incluye el paso a x4 y x5 en el camino.';
 
